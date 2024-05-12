@@ -88,7 +88,7 @@ function install_distribution_specific() {
 # create_sources_list_and_deploy_repo_key <when> <release> <basedir>
 #
 # <when>: rootfs|image
-# <release>: bullseye|bookworm|sid|focal|jammy|kinetic|lunar|mantic
+# <release>: bullseye|bookworm|sid|focal|jammy|noble|oracular
 # <basedir>: path to root directory
 #
 function create_sources_list_and_deploy_repo_key() {
@@ -147,13 +147,11 @@ function create_sources_list_and_deploy_repo_key() {
 			EOF
 			;;
 
-		sid) # sid is permanent unstable development and has no such thing as updates or security
+		sid|unstable) # sid is permanent unstable development and has no such thing as updates or security
 			cat <<- EOF > "${basedir}"/etc/apt/sources.list
 				deb http://${DEBIAN_MIRROR} $release main contrib non-free non-free-firmware
 				#deb-src http://${DEBIAN_MIRROR} $release main contrib non-free non-free-firmware
 
-				deb http://${DEBIAN_MIRROR} unstable main contrib non-free non-free-firmware
-				#deb-src http://${DEBIAN_MIRROR} unstable main contrib non-free non-free-firmware
 			EOF
 
 			# Exception: with riscv64 not everything was moved from ports
@@ -163,7 +161,7 @@ function create_sources_list_and_deploy_repo_key() {
 			fi
 			;;
 
-		focal | jammy | kinetic | lunar | mantic | noble)
+		focal | jammy | noble | oracular)
 			cat <<- EOF > "${basedir}"/etc/apt/sources.list
 				deb http://${UBUNTU_MIRROR} $release main restricted universe multiverse
 				#deb-src http://${UBUNTU_MIRROR} $release main restricted universe multiverse
