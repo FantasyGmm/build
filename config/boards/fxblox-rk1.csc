@@ -4,7 +4,7 @@ BOARDFAMILY="rockchip-rk3588"
 BOARD_MAINTAINER="mahdichi"
 BOOTCONFIG="fxblox-rk1-rk3588_defconfig"
 BOOT_SOC="rk3588"
-KERNEL_TARGET="legacy,vendor"
+KERNEL_TARGET="vendor"
 FULL_DESKTOP="yes"
 BOOT_LOGO="desktop"
 BOOT_FDT_FILE="rockchip/rk3588-fxblox-rk1.dtb"
@@ -12,7 +12,6 @@ BOOT_SCENARIO="spl-blobs"
 BOOT_SUPPORT_SPI="yes"
 BOOT_SPI_RKSPI_LOADER="yes"
 IMAGE_PARTITION_TABLE="gpt"
-BOOTFS_TYPE="fat"
 DDR_BLOB='rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.11.bin'
 BL31_BLOB='rk35/rk3588_bl31_v1.38.elf'
 

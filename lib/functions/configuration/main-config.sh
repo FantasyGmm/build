@@ -358,6 +358,7 @@ function do_extra_configuration() {
 	#         in case the user tries to use them in lib.config, hopefully they'll be detected as "wishful hooking" and the user will be wrn'ed.
 	if [[ -f $USERPATCHES_PATH/lib.config ]]; then
 		display_alert "Using user configuration override" "$USERPATCHES_PATH/lib.config" "info"
+		# shellcheck source=/dev/null
 		source "$USERPATCHES_PATH"/lib.config
 		track_general_config_variables "after sourcing lib.config"
 	fi
@@ -569,4 +570,20 @@ function check_filesystem_compatibility_on_host() {
 		display_alert "Could not check filesystem support via /proc/filesystems on build host." "Build might fail in case of unsupported rootfs type." "wrn"
 	fi
 	return 0
+}
+
+function pre_install_distribution_specific__disable_cnf_apt_hook(){
+	if [[ $(dpkg --print-architecture) != "${ARCH}" && -f "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found ]]; then #disable command-not-found (60% build-time saved under qemu)
+	display_alert "Disabling command-not-found during build-time to speed up image creation" "${BOARD}:${RELEASE}-${BRANCH}" "info"
+	run_host_command_logged mv "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled
+        fi
+}
+
+
+function post_post_debootstrap_tweaks__restore_cnf_apt_hook(){
+	if [ -f "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled ]; then # (re-enable command-not-found after building rootfs if it's been disabled)
+	display_alert "Enabling command-not-found after build-time " "${BOARD}:${RELEASE}-${BRANCH}" "info"
+	run_host_command_logged mv "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found.disabled "${SDCARD}"/etc/apt/apt.conf.d/50command-not-found
+	fi
+
 }
