@@ -4,7 +4,7 @@ BOARDFAMILY="rockchip-rk3588"
 BOARD_MAINTAINER="Tonymac32"
 BOOTCONFIG="nanopc_t6_defconfig" # vendor name, not standard, see hook below, set BOOT_SOC below to compensate
 BOOT_SOC="rk3588"
-KERNEL_TARGET="legacy,vendor,edge,collabora"
+KERNEL_TARGET="vendor,current,edge,collabora"
 KERNEL_TEST_TARGET="vendor,edge"
 FULL_DESKTOP="yes"
 BOOT_LOGO="desktop"
@@ -14,9 +14,6 @@ BOOT_SUPPORT_SPI="yes"
 BOOT_SPI_RKSPI_LOADER="yes"
 IMAGE_PARTITION_TABLE="gpt"
 declare -g UEFI_EDK2_BOARD_ID="nanopc-t6" # This _only_ used for uefi-edk2-rk3588 extension
-
-DDR_BLOB='rk35/rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin'
-BL31_BLOB='rk35/rk3588_bl31_v1.45.elf'
 
 function post_family_tweaks__nanopct6_naming_audios() {
 	display_alert "$BOARD" "Renaming nanopct6 audio" "info"
