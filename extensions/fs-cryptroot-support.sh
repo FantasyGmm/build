@@ -5,23 +5,23 @@
 function add_host_dependencies__add_cryptroot_tooling() {
 	display_alert "Adding cryptroot to host dependencies" "cryptsetup LUKS" "debug"
 	EXTRA_BUILD_DEPS="${EXTRA_BUILD_DEPS} cryptsetup openssh-client" # @TODO: convert to array later
-
-	display_alert "Adding rootfs encryption related packages" "cryptsetup cryptsetup-initramfs" "info"
-	add_packages_to_rootfs cryptsetup cryptsetup-initramfs
-
-	if [[ $CRYPTROOT_SSH_UNLOCK == yes ]]; then
-		display_alert "Adding rootfs encryption related packages" "dropbear-initramfs" "info"
-		add_packages_to_rootfs dropbear-initramfs
-	fi
 }
 
-function extension_prepare_config__prepare_cryptroot() { 
+function extension_prepare_config__prepare_cryptroot() {
+	display_alert "Adding rootfs encryption related packages" "cryptsetup cryptsetup-initramfs" "info"
+	add_packages_to_image cryptsetup cryptsetup-initramfs
+
 	# Config for cryptroot, a boot partition is required.
 	declare -g BOOTPART_REQUIRED=yes
 	EXTRA_IMAGE_SUFFIXES+=("-crypt")
+
+	if [[ $CRYPTROOT_SSH_UNLOCK == yes ]]; then
+		display_alert "Adding rootfs encryption related packages" "dropbear-initramfs" "info"
+		add_packages_to_image dropbear-initramfs
+	fi
 }
 
-function prepare_root_device__encrypt_root_device(){
+function prepare_root_device__encrypt_root_device() {
 	# We encrypt the rootdevice (currently a loop device) and return the new mapped rootdevice
 	check_loop_device "$rootdevice"
 	display_alert "Encrypting root partition with LUKS..." "cryptsetup luksFormat $rootdevice" ""
@@ -47,7 +47,7 @@ function pre_install_kernel_debs__adjust_dropbear_configuration() {
 		# Set the port of the dropbear ssh daemon in the initramfs to a different one if configured
 		# this avoids the typical 'host key changed warning' - `WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`
 		[[ -f "${dropbear_dir}/${dropbear_config}" ]] &&
-			sed -i 's/^#DROPBEAR_OPTIONS=/DROPBEAR_OPTIONS="-j -k -p '"${CRYPTROOT_SSH_UNLOCK_PORT}"' -s -c cryptroot-unlock"/' \
+			sed -i "s/^#DROPBEAR_OPTIONS=.*/DROPBEAR_OPTIONS=\"-I 100 -j -k -p "${CRYPTROOT_SSH_UNLOCK_PORT}" -s -c cryptroot-unlock\"/" \
 				"${dropbear_dir}/${dropbear_config}"
 
 		# setup dropbear authorized_keys, either provided by userpatches or generated
