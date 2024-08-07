@@ -1032,6 +1032,18 @@
 	status = "okay";
 };
 
+&sdhc_2 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdc2_default_state &sdc2_card_det_n>;
+	vmmc-supply = <&vreg_l9c_2p96>;
+	vqmmc-supply = <&vreg_l6c_2p96>;
+	cd-gpios = <&tlmm 77 GPIO_ACTIVE_LOW>;
+	bus-width = <4>;
+	no-sdio;
+	no-mmc;
+};
+
 /* TERT I2S Uses 1 I2S SD Lines for audio on LT9611 HDMI Bridge */
 &q6afedai {
 	dai@20 {
@@ -1048,18 +1060,10 @@
 	dai@1 {
 		reg = <1>;
 	};
-};
 
-&sdhc_2 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&sdc2_default_state &sdc2_card_det_n>;
-	vmmc-supply = <&vreg_l9c_2p96>;
-	vqmmc-supply = <&vreg_l6c_2p96>;
-	cd-gpios = <&tlmm 77 GPIO_ACTIVE_LOW>;
-	bus-width = <4>;
-	no-sdio;
-	no-mmc;
+	dai@2 {
+		reg = <2>;
+	};
 };
 
 &sound {
@@ -1069,7 +1073,8 @@
 	model = "Qualcomm-RB5-WSA8815-Speakers-DMIC0";
 	audio-routing =
 		"MM_DL1",  "MultiMedia1 Playback",
-		"MM_DL2",  "MultiMedia2 Playback";
+		"MM_DL2",  "MultiMedia2 Playback",
+		"MultiMedia3 Capture", "MM_UL3";
 
 	mm1-dai-link {
 		link-name = "MultiMedia1";
@@ -1082,6 +1087,13 @@
 		link-name = "MultiMedia2";
 		cpu {
 			sound-dai = <&q6asmdai  MSM_FRONTEND_DAI_MULTIMEDIA2>;
+		};
+	};
+
+	mm3-dai-link {
+		link-name = "MultiMedia3";
+		cpu {
+			sound-dai = <&q6asmdai  MSM_FRONTEND_DAI_MULTIMEDIA3>;
 		};
 	};
 
@@ -1099,6 +1111,7 @@
 			sound-dai = <&lt9611_codec 0>;
 		};
 	};
+
 };
 
 &tlmm {

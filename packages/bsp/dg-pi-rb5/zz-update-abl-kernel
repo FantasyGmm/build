@@ -1,0 +1,32 @@
+#!/bin/bash
+set -ex
+new_rootfs_image_uuid=$(sed -e 's/^.*root=UUID=//' -e 's/ .*$//' < /proc/cmdline)
+BOOTIMG_CMDLINE_EXTRA="clk_ignore_unused pd_ignore_unused loglevel=8 panic=30 audit=0 allow_mismatched_32bit_el0 mem_sleep_default=s2idle console=tty0 earlycon=qcom_geni,0xa90000 console=ttyMSM0,1500000n8 pcie_pme=nomsi"
+bootimg_cmdline="${BOOTIMG_CMDLINE_EXTRA} root=UUID=${new_rootfs_image_uuid} slot_suffix=${abl_boot_partition_label#boot}"
+gzip -c /boot/vmlinuz > /tmp/Image.gz
+file /boot/vmlinuz
+file /tmp/Image.gz
+version=$(readlink /boot/vmlinuz | cut -d'-' -f2-)
+cat /tmp/Image.gz /usr/lib/linux-image-${version}/qcom/dg-pi-rb5.dtb > /tmp/Image.gz-dtb
+source /boot/armbianEnv.txt
+/usr/bin/mkbootimg \
+        --kernel /tmp/Image.gz-dtb \
+        --ramdisk /boot/initrd.img \
+        --base 0x0 \
+        --second_offset 0x00f00000 \
+        --cmdline "${bootimg_cmdline}" \
+        --kernel_offset 0x8000 \
+        --ramdisk_offset 0x1000000 \
+        --tags_offset 0x100 \
+        --pagesize 4096 \
+        -o /boot/armbian-kernel.img
+rm -f /tmp/Image.gz /tmp/Image.gz-dtb
+
+if [ -n "$abl_boot_partition_label" ];then
+        echo abl boot partition label is $abl_boot_partition_label
+        dd if=/boot/armbian-kernel.img of=/dev/disk/by-partlabel/${abl_boot_partition_label}
+else
+        echo abl boot partition label is not defined, exit
+        exit
+fi
+set +ex
