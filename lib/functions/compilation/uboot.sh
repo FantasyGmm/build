@@ -45,6 +45,8 @@ function patch_uboot_target() {
 # this receives version  target uboot_name uboottempdir uboot_target_counter toolchain as variables.
 # also receives uboot_prefix, target_make, target_patchdir, target_files as input
 function compile_uboot_target() {
+	: "${artifact_version:?artifact_version is not set}"
+
 	patch_uboot_target
 
 	if [[ $CREATE_PATCHES == yes ]]; then
@@ -78,7 +80,7 @@ function compile_uboot_target() {
 		pipetty make "${CTHREADS}" "${BOOTCONFIG}" "CROSS_COMPILE=\"${CCACHE} ${UBOOT_COMPILER}\""
 
 	# armbian specifics u-boot settings
-	[[ -f .config ]] && sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="-armbian"/g' .config
+	[[ -f .config ]] && sed -i "s/CONFIG_LOCALVERSION=\"\"/CONFIG_LOCALVERSION=\"-armbian-${artifact_version}\"/g" .config
 	[[ -f .config ]] && sed -i 's/CONFIG_LOCALVERSION_AUTO=.*/# CONFIG_LOCALVERSION_AUTO is not set/g' .config
 
 	# for modern (? 2018-2019?) kernel and non spi targets
@@ -207,6 +209,9 @@ function compile_uboot_target() {
 	# REAL COMPILATION SECTION STARTING HERE #
 	##########################################
 
+	local uboot_cflags="${uboot_cflags_array[*]}"
+	local ts=${SECONDS}
+
 	# Collect make environment variables, similar to 'kernel-make.sh'
 	uboot_make_envs=(
 		"CFLAGS='${uboot_cflags}'"
@@ -214,15 +219,11 @@ function compile_uboot_target() {
 		"CCACHE_BASEDIR=$(pwd)"
 		"PATH=${toolchain}:${toolchain2}:${PATH}"
 		"PYTHONPATH=\"${PYTHON3_INFO[MODULES_PATH]}:${PYTHONPATH}\"" # Insert the pip modules downloaded by Armbian into PYTHONPATH (needed e.g. for pyelftools)
-		"HOME=${WORKDIR}"                                            # give it a temporary-dir HOME; some Python stuff in old u-boots wants HOME env to be set
 	)
 
 	# workaround when two compilers are needed
 	cross_compile="CROSS_COMPILE=\"$CCACHE $UBOOT_COMPILER\""
 	[[ -n $UBOOT_TOOLCHAIN2 ]] && cross_compile="ARMBIAN=foe" # empty parameter is not allowed
-
-	local uboot_cflags="${uboot_cflags_array[*]}"
-	local ts=${SECONDS}
 
 	display_alert "${uboot_prefix}Compiling u-boot" "${version} ${target_make} with gcc '${gcc_version_main}'" "info"
 	declare -g if_error_detail_message="${uboot_prefix}Failed to build u-boot ${version} ${target_make}"
