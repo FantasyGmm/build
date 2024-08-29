@@ -1,11 +1,17 @@
+name: "Announce PR on Discord for review"
+run-name: 'Announce PR #${{ github.event.pull_request.number }} on Discord for review'
+
 on:
   pull_request:
-    types: [ opened ]
-    branches: [ main ]
+    types: [ labeled ]
 
 jobs:
-  build:
+  Announce:
+    permissions:
+      pull-requests: read
+
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'armbian/build' && github.event.label.id == '6210849975' }}
     steps:
       - name: Get repo
         uses: actions/checkout@v4
