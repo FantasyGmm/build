@@ -14,11 +14,13 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
 	rockchip-rk3318-box-led-conf2.dtbo \
 	rockchip-rk3318-box-led-conf3.dtbo \
 	rockchip-rk3318-box-led-conf4.dtbo \
+	rockchip-rk3318-box-led-conf5.dtbo \
 	rockchip-rk3318-box-wlan-ap6330.dtbo \
 	rockchip-rk3318-box-wlan-ap6334.dtbo \
 	rockchip-rk3318-box-wlan-ext.dtbo \
 	rockchip-rk3328-i2c0.dtbo \
 	rockchip-rk3328-i2s1-pcm5102.dtbo \
+	rockchip-rk3328-mkspi-disable-lcd-spi.dtbo \
 	rockchip-rk3328-opp-1.4ghz.dtbo \
 	rockchip-rk3328-opp-1.5ghz.dtbo \
 	rockchip-rk3328-spi-spidev.dtbo \

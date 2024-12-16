@@ -16,6 +16,7 @@ declare -g BOOTSCRIPT="boot-sunxi.cmd:boot.cmd"
 declare -g BOOTENV_FILE='sunxi.txt'
 declare -g LINUXFAMILY=sunxi
 declare -g UBOOT_FW_ENV='0x88000,0x20000' # /etc/fw_env.config offset and env size
+declare -g OVERLAY_DIR="/boot/dtb/allwinner/overlay"
 declare -g ASOUND_STATE='asound.state.sunxi-next'
 declare -g GOVERNOR=ondemand
 
@@ -31,12 +32,12 @@ case $BRANCH in
 
 	current)
 		declare -g KERNEL_MAJOR_MINOR="6.6" # Major and minor versions of this kernel.
-		declare -g KERNELBRANCH="tag:v6.6.44"
+		declare -g KERNELBRANCH="tag:v6.6.62"
 		;;
 
 	edge)
-		declare -g KERNEL_MAJOR_MINOR="6.10" # Major and minor versions of this kernel.
-		declare -g KERNELBRANCH="tag:v6.10.5"
+		declare -g KERNEL_MAJOR_MINOR="6.11" # Major and minor versions of this kernel.
+		declare -g KERNELBRANCH="tag:v6.11.9"
 		;;
 esac
 
@@ -62,12 +63,13 @@ write_uboot_platform() {
 }
 
 setup_write_uboot_platform() {
+	local tmp part dev
 	if grep -q "ubootpart" /proc/cmdline; then
-		local tmp=$(cat /proc/cmdline)
+		tmp=$(cat /proc/cmdline)
 		tmp="${tmp##*ubootpart=}"
 		tmp="${tmp%% *}"
-		[[ -n $tmp ]] && local part=$(findfs PARTUUID=$tmp 2> /dev/null)
-		[[ -n $part ]] && local dev=$(lsblk -n -o PKNAME $part 2> /dev/null)
+		[[ -n $tmp ]] && part=$(findfs PARTUUID=$tmp 2> /dev/null)
+		[[ -n $part ]] && dev=$(lsblk -n -o PKNAME $part 2> /dev/null)
 		[[ -n $dev ]] && DEVICE="/dev/$dev"
 	elif [[ -f /var/lib/armbian/force_search_uboot ]]; then
 		# This may cause overwriting u-boot for android or other non-Armbian OS installed on eMMC

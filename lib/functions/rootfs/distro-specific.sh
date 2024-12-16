@@ -42,19 +42,8 @@ function install_distribution_specific() {
 
 	# Set DNS server if systemd-resolved is in use
 	if [[ -n "$NAMESERVER" && -f "${SDCARD}"/etc/systemd/resolved.conf ]]; then
-		display_alert "Setup DNS server for systemd-resolved" "${NAMESERVER}" "info"
-
-		# Use resolved.conf.d/ directory as recommended by resolved itself
-		mkdir -p "${SDCARD}"/etc/systemd/resolved.conf.d/
-
-		cat <<- EOF > "${SDCARD}"/etc/systemd/resolved.conf.d/00-armbian-default-dns.conf
-			# Added by Armbian
-			#
-			# See resolved.conf(5) for details
-
-			[Resolve]
-			DNS=${NAMESERVER}
-		EOF
+		display_alert "Using systemd-resolved" "for DNS management" "info"
+		# This used to set a default DNS entry from $NAMESERVER into "${SDCARD}"/etc/systemd/resolved.conf.d/00-armbian-default-dns.conf -- no longer; better left to DHCP.
 	fi
 
 	# cleanup motd services and related files
@@ -167,20 +156,17 @@ function create_sources_list_and_deploy_repo_key() {
 			;;
 	esac
 
+	# add armbian key
 	display_alert "Adding Armbian repository and authentication key" "${when} :: /etc/apt/sources.list.d/armbian.list" "info"
+	mkdir -p "${basedir}"/usr/share/keyrings
+	# change to binary form
+	gpg --dearmor < "${SRC}"/config/armbian.key > "${basedir}"/usr/share/keyrings/armbian.gpg
+	SIGNED_BY="[signed-by=/usr/share/keyrings/armbian.gpg] "
 
-	# apt-key add is getting deprecated
-	APT_VERSION=$(chroot "${basedir}" /bin/bash -c "apt --version | cut -d\" \" -f2")
-	if linux-version compare "${APT_VERSION}" ge 2.4.1; then
-		# add armbian key
-		mkdir -p "${basedir}"/usr/share/keyrings
-		# change to binary form
-		gpg --dearmor < "${SRC}"/config/armbian.key > "${basedir}"/usr/share/keyrings/armbian.gpg
-		SIGNED_BY="[signed-by=/usr/share/keyrings/armbian.gpg] "
-	else
-		# use old method for compatibility reasons # @TODO: rpardini: not gonna fix this?
+	# lets keep old way for old distributions
+	if [[ "${RELEASE}" =~ (focal|bullseye) ]]; then
 		cp "${SRC}"/config/armbian.key "${basedir}"
-		chroot "${basedir}" /bin/bash -c "cat armbian.key | apt-key add -"
+		chroot "${basedir}" /bin/bash -c "cat armbian.key | apt-key add - > /dev/null 2>&1"
 	fi
 
 	declare -a components=()
