@@ -1,4 +1,4 @@
-config: # This is file 'patch/kernel/archive/sm8250-6.12/0000.patching_config.yaml'
+config: # This is file 'patch/kernel/archive/sm8250-6.7/0000.patching_config.yaml'
 
   # Just some info stuff; not used by the patching scripts
   name: sm8250-6.12
