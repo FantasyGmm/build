@@ -24,7 +24,11 @@ function post_build_image__900_convert_to_abl_img() {
 	truncate --size=9728M ${ROOTFS_IMAGE_FILE}
 	mkfs.ext4 -F ${ROOTFS_IMAGE_FILE}
 	new_rootfs_image_uuid=$(blkid -s UUID -o value ${ROOTFS_IMAGE_FILE})
-	old_image_loop_device=$(losetup -f -P --show ${DESTIMG}/${version}.img)
+	LOOP=$(losetup -f)
+	[[ -z $LOOP ]] && exit_with_error "Unable to find free loop device"
+	display_alert "Allocated loop device" "LOOP=${LOOP}"
+	check_loop_device "${LOOP}"
+	old_image_loop_device=$(losetup $LOOP -P --show ${DESTIMG}/${version}.img)
 	old_rootfs_image_uuid=$(blkid -s UUID -o value ${old_image_loop_device}p1)
 	mount ${old_image_loop_device}p1 ${old_rootfs_image_mount_dir}
 	mount ${ROOTFS_IMAGE_FILE} ${new_rootfs_image_mount_dir}
