@@ -8,7 +8,7 @@ declare -g EXTRAWIFI="no"
 declare -g BOOTCONFIG="none"
 declare -g BOOTFS_TYPE="fat"
 declare -g BOOTSIZE="256"
-declare -g BOOTIMG_CMDLINE_EXTRA="clk_ignore_unused pd_ignore_unused rw quiet"
+declare -g BOOTIMG_CMDLINE_EXTRA="clk_ignore_unused pd_ignore_unused rw quiet rootwait"
 declare -g IMAGE_PARTITION_TABLE="gpt"
 
 # Use the full firmware, complete linux-firmware plus Armbian's
@@ -31,12 +31,6 @@ function post_family_tweaks_bsp__ayn-odin2_firmware() {
 	install -Dm644 $SRC/packages/bsp/ayn-odin2/HiFi.conf $destination/usr/share/alsa/ucm2/AYN/Odin2/HiFi.conf
 	ln -sfv ../../AYN/Odin2/AYN-Odin2.conf \
 		"$destination/usr/share/alsa/ucm2/conf.d/sm8550/AYN-Odin2.conf"
-
-	# Bluetooth MAC addr setup service
-	mkdir -p $destination/usr/local/bin/
-	mkdir -p $destination/usr/lib/systemd/system/
-	install -Dm655 $SRC/packages/bsp/generate-bt-mac-addr/bt-fixed-mac.sh $destination/usr/local/bin/
-	install -Dm644 $SRC/packages/bsp/generate-bt-mac-addr/bt-fixed-mac.service $destination/usr/lib/systemd/system/
 
 	# Kernel postinst script to update abl boot partition
 	install -Dm655 $SRC/packages/bsp/ayn-odin2/zz-update-abl-kernel $destination/etc/kernel/postinst.d/
@@ -67,10 +61,9 @@ function post_family_tweaks__enable_services() {
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled
 	do_with_retries 3 chroot_sdcard_apt_get_update
 	chroot_sdcard systemctl enable qbootctl.service
-	chroot_sdcard systemctl enable bt-fixed-mac.service
 
 	# Add Gamepad udev rule
-	echo 'SUBSYSTEM=="input", ATTRS{name}=="Ayn Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
+	echo 'SUBSYSTEM=="input", ATTRS{name}=="AYN Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
 	# Not Any driver support suspend mode
 	chroot_sdcard systemctl mask suspend.target
 
