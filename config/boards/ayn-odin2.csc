@@ -1,32 +1,47 @@
 # Generate kernel and rootfs image for Qcom ABL Custom booting
 declare -g BOARD_NAME="Ayn Odin2"
 declare -g BOARD_MAINTAINER="FantasyGmm"
-declare -g BOARDFAMILY="qcom-abl"
-declare -g KERNEL_TARGET="sm8550"
-declare -g KERNELPATCHDIR="sm8550-6.7"
+declare -g BOARDFAMILY="sm8550"
+declare -g KERNEL_TARGET="current,edge"
+declare -g KERNEL_TEST_TARGET="edge"
 declare -g EXTRAWIFI="no"
 declare -g BOOTCONFIG="none"
 declare -g BOOTFS_TYPE="fat"
 declare -g BOOTSIZE="256"
-declare -g BOOTIMG_CMDLINE_EXTRA="clk_ignore_unused pd_ignore_unused panic=30 audit=0 allow_mismatched_32bit_el0 rw mem_sleep_default=s2idle"
+declare -g BOOTIMG_CMDLINE_EXTRA="clk_ignore_unused pd_ignore_unused rw quiet"
 declare -g IMAGE_PARTITION_TABLE="gpt"
 
 # Use the full firmware, complete linux-firmware plus Armbian's
 declare -g BOARD_FIRMWARE_INSTALL="-full"
-
 declare -g DESKTOP_AUTOLOGIN="yes"
 
-function post_family_config_branch_sm8550__edk2_kernel() {
-	declare -g KERNELSOURCE='https://github.com/edk2-porting/linux-next'
-	declare -g KERNEL_MAJOR_MINOR="6.7" # Major and minor versions of this kernel.
-	declare -g KERNELBRANCH="branch:ci/odin2/stable"
-	declare -g LINUXCONFIG="linux-${ARCH}-${BRANCH}" # for this board: linux-arm64-sm8550
-	display_alert "Setting up kernel ${KERNEL_MAJOR_MINOR} for" "${BOARD}" "info"
+function ayn-odin2_is_userspace_supported() {
+	[[ "${RELEASE}" == "jammy" ]] && return 0
+	[[ "${RELEASE}" == "trixie" ]] && return 0
+	[[ "${RELEASE}" == "noble" ]] && return 0
+	return 1
 }
 
-function ayn-odin2_is_userspace_supported() {
-	[[ "${RELEASE}" == "trixie" || "${RELEASE}" == "sid" || "${RELEASE}" == "mantic" || "${RELEASE}" == "noble" ]] && return 0
-	return 1
+function post_family_tweaks_bsp__ayn-odin2_firmware() {
+	display_alert "$BOARD" "Install firmwares for ayn odin2" "info"
+
+	# alsa-ucm-conf profile for Ayn Odin2
+	mkdir -p $destination/usr/share/alsa/ucm2/conf.d/sm8550
+	install -Dm644 $SRC/packages/bsp/ayn-odin2/AYN-Odin2.conf $destination/usr/share/alsa/ucm2/AYN/Odin2/AYN-Odin2.conf
+	install -Dm644 $SRC/packages/bsp/ayn-odin2/HiFi.conf $destination/usr/share/alsa/ucm2/AYN/Odin2/HiFi.conf
+	ln -sfv ../../AYN/Odin2/AYN-Odin2.conf \
+		"$destination/usr/share/alsa/ucm2/conf.d/sm8550/AYN-Odin2.conf"
+
+	# Bluetooth MAC addr setup service
+	mkdir -p $destination/usr/local/bin/
+	mkdir -p $destination/usr/lib/systemd/system/
+	install -Dm655 $SRC/packages/bsp/generate-bt-mac-addr/bt-fixed-mac.sh $destination/usr/local/bin/
+	install -Dm644 $SRC/packages/bsp/generate-bt-mac-addr/bt-fixed-mac.service $destination/usr/lib/systemd/system/
+
+	# Kernel postinst script to update abl boot partition
+	install -Dm655 $SRC/packages/bsp/ayn-odin2/zz-update-abl-kernel $destination/etc/kernel/postinst.d/
+
+	return 0
 }
 
 function post_family_tweaks__enable_services() {
@@ -37,35 +52,27 @@ function post_family_tweaks__enable_services() {
 		return 0
 	fi
 
-	if [[ "${RELEASE}" == "noble" ]]; then
+	if [[ "${RELEASE}" == "jammy" ]] || [[ "${RELEASE}" == "noble" ]]; then
 		display_alert "Adding Mesa PPA For Ubuntu " "${BOARD}" "info"
-		do_with_retries 3 chroot_sdcard add-apt-repository ppa:oibaf/graphics-drivers --yes --no-update
+		do_with_retries 3 chroot_sdcard add-apt-repository ppa:liujianfeng1994/qcom-mainline --yes --no-update
 	fi
 
 	# We need unudhcpd from armbian repo, so enable it
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled "${SDCARD}"/etc/apt/sources.list.d/armbian.sources
 
-	# Add Gamepad udev rule
-	echo 'SUBSYSTEM=="input", ATTRS{name}=="Ayn Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_MOUSE}="0", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
-	# No driver support for suspend
-	chroot_sdcard systemctl mask suspend.target
-	# Add Bt Mac Fixed service
-	install -Dm655 $SRC/packages/bsp/ayn-odin2/bt-fixed-mac.sh "${SDCARD}"/usr/local/bin/
-	install -Dm644 $SRC/packages/bsp/ayn-odin2/bt-fixed-mac.service "${SDCARD}"/usr/lib/systemd/system/
-	chroot_sdcard systemctl enable bt-fixed-mac
-
 	do_with_retries 3 chroot_sdcard_apt_get_update
 	display_alert "$BOARD" "Installing board tweaks" "info"
-	do_with_retries 3 chroot_sdcard_apt_get_install alsa-ucm-conf unudhcpd mkbootimg git
-
-	# Disable armbian repo back
+	do_with_retries 3 chroot_sdcard_apt_get_install alsa-ucm-conf qbootctl qrtr-tools unudhcpd mkbootimg
+	# disable armbian repo back
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled
 	do_with_retries 3 chroot_sdcard_apt_get_update
+	chroot_sdcard systemctl enable qbootctl.service
+	chroot_sdcard systemctl enable bt-fixed-mac.service
 
-	do_with_retries 3 chroot_sdcard_apt_get_install mesa-vulkan-drivers qbootctl qrtr-tools protection-domain-mapper tqftpserv
-
-	# Kernel postinst script to update abl boot partition
-	install -Dm655 $SRC/packages/bsp/ayn-odin2/zz-update-abl-kernel "${SDCARD}"/etc/kernel/postinst.d/
+	# Add Gamepad udev rule
+	echo 'SUBSYSTEM=="input", ATTRS{name}=="Ayn Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
+	# Not Any driver support suspend mode
+	chroot_sdcard systemctl mask suspend.target
 
 	cp $SRC/packages/bsp/ayn-odin2/LinuxLoader.cfg "${SDCARD}"/boot/
 
@@ -111,9 +118,6 @@ function post_family_tweaks__preset_configs() {
 }
 
 function post_family_tweaks_bsp__firmware_in_initrd() {
-	random_mac=$(openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//')
-	declare -g BOOTIMG_CMDLINE_EXTRA="${BOOTIMG_CMDLINE_EXTRA} bt_mac=${random_mac}"
-	display_alert "Generate a random Bluetooth MAC address, Mac:${random_mac}" "info"
 	display_alert "Adding to bsp-cli" "${BOARD}: firmware in initrd" "info"
 	declare file_added_to_bsp_destination # Will be filled in by add_file_from_stdin_to_bsp_destination
 	# Using odin2's firmware for now
@@ -121,11 +125,12 @@ function post_family_tweaks_bsp__firmware_in_initrd() {
 		#!/bin/bash
 		[[ "$1" == "prereqs" ]] && exit 0
 		. /usr/share/initramfs-tools/hook-functions
-		for f in /lib/firmware/qcom/sm8550/ayn/odin2/* ; do
+		for f in /lib/firmware/qcom/sm8550/ayn/odin2portal/* ; do
 			add_firmware "${f#/lib/firmware/}"
 		done
 		add_firmware "qcom/a740_sqe.fw" # Extra one for dpu
 		add_firmware "qcom/gmu_gen70200.bin" # Extra one for gpu
+		add_firmware "qcom/vpu/vpu30_p4.mbn" # Extra one for vpu
 		# Extra one for wifi
 		for f in /lib/firmware/ath12k/WCN7850/hw2.0/* ; do
 			add_firmware "${f#/lib/firmware/}"
