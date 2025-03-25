@@ -1083,6 +1083,23 @@ reserved-memory {
 
 &pm8550_pwm {
 	status = "okay";
+	power_led {
+		color = <LED_COLOR_ID_RGB>;
+		label = "power-led";
+
+		red {
+			reg = <0x01>;
+			color = <LED_COLOR_ID_RED>;
+		};
+		green {
+			reg = <0x02>;
+			color = <LED_COLOR_ID_GREEN>;
+		};
+		blue {
+			reg = <0x03>;
+			color = <LED_COLOR_ID_BLUE>;
+		};
+	};
 };
 
 &pm8550b_eusb2_repeater {
