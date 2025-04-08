@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: John Doe <john.doe@somewhere.on.planet>
+Date: Wed, 16 Apr 2025 03:32:06 +0000
+Subject: Patching kernel sm8250 files drivers/hwmon/pwm-fan.c
+
+Signed-off-by: John Doe <john.doe@somewhere.on.planet>
+---
+ drivers/hwmon/pwm-fan.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/hwmon/pwm-fan.c b/drivers/hwmon/pwm-fan.c
+index 579d31bb9..5932c95a5 100644
+--- a/drivers/hwmon/pwm-fan.c
++++ b/drivers/hwmon/pwm-fan.c
+@@ -20,10 +20,11 @@
+ #include <linux/sysfs.h>
+ #include <linux/thermal.h>
+ #include <linux/timer.h>
+ 
+ #define MAX_PWM 255
++#define BOOT_PWM 10
+ 
+ struct pwm_fan_tach {
+ 	int irq;
+ 	atomic_t pulses;
+ 	unsigned int rpm;
+@@ -551,11 +552,11 @@ static int pwm_fan_probe(struct platform_device *pdev)
+ 
+ 	/* use maximum cooling level if provided */
+ 	if (ctx->pwm_fan_cooling_levels)
+ 		initial_pwm = ctx->pwm_fan_cooling_levels[ctx->pwm_fan_max_state];
+ 	else
+-		initial_pwm = MAX_PWM;
++		initial_pwm = BOOT_PWM;
+ 
+ 	/*
+ 	 * Set duty cycle to maximum allowed and enable PWM output as well as
+ 	 * the regulator. In case of error nothing is changed
+ 	 */
+-- 
+Created with Armbian build tools https://github.com/armbian/build
+
