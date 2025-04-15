@@ -83,13 +83,13 @@ function post_family_tweaks__ayn-odin2portal_enable_services() {
 	# disable armbian repo back
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled
 	do_with_retries 3 chroot_sdcard_apt_get_update
-	chroot_sdcard systemctl enable qbootctl.service
 
 	# Add Gamepad udev rule
 	echo 'SUBSYSTEM=="input", ATTRS{name}=="AYN Odin2 Gamepad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"' > "${SDCARD}"/etc/udev/rules.d/99-ignore-gamepad.rules
 	# Not Any driver support suspend mode
 	chroot_sdcard systemctl mask suspend.target
 
+	chroot_sdcard systemctl enable qbootctl.service
 	chroot_sdcard systemctl enable usbgadget-rndis.service
 
 	return 0

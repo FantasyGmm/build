@@ -8,7 +8,7 @@ declare -g EXTRAWIFI="no"
 declare -g BOOTCONFIG="none"
 
 declare -g UEFI_GRUB_TERMINAL="gfxterm" # Use graphics in grub, for the Armbian wallpaper.
-declare -g GRUB_CMDLINE_LINUX_DEFAULT="clk_ignore_unused pd_ignore_unused arm64.nopauth efi=noruntime fbcon=rotate:3 console=ttyMSM0,115200n8"
+declare -g GRUB_CMDLINE_LINUX_DEFAULT="clk_ignore_unused pd_ignore_unused arm64.nopauth efi=noruntime fbcon=rotate:1 console=ttyMSM0,115200n8"
 declare -g BOOT_FDT_FILE="qcom/qcs8550-ayn-odin2.dtb"
 
 declare -g SERIALCON="${SERIALCON:-tty1}"
@@ -79,7 +79,7 @@ function post_family_tweaks__ayn-odin2_enable_services() {
 
 	do_with_retries 3 chroot_sdcard_apt_get_update
 	display_alert "Installing ${BOARD} tweaks" "warn"
-	do_with_retries 3 chroot_sdcard_apt_get_install alsa-ucm-conf qbootctl qrtr-tools unudhcpd mkbootimg git mtools zstd
+	do_with_retries 3 chroot_sdcard_apt_get_install alsa-ucm-conf qbootctl qrtr-tools unudhcpd mkbootimg
 	# disable armbian repo back
 	mv "${SDCARD}"/etc/apt/sources.list.d/armbian.sources "${SDCARD}"/etc/apt/sources.list.d/armbian.sources.disabled
 	do_with_retries 3 chroot_sdcard_apt_get_update
@@ -103,7 +103,7 @@ function post_family_tweaks_bsp__ayn-odin2_bsp_firmware_in_initrd() {
 		#!/bin/bash
 		[[ "$1" == "prereqs" ]] && exit 0
 		. /usr/share/initramfs-tools/hook-functions
-		for f in /lib/firmware/qcom/sm8550/ayn/odin2/* ; do
+		for f in /lib/firmware/qcom/sm8550/ayn/odin2portal/* ; do
 			add_firmware "${f#/lib/firmware/}"
 		done
 		add_firmware "qcom/a740_sqe.fw" # Extra one for dpu
