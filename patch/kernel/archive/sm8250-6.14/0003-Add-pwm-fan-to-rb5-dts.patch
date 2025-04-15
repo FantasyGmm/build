@@ -1,0 +1,163 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: John Doe <john.doe@somewhere.on.planet>
+Date: Wed, 16 Apr 2025 03:36:13 +0000
+Subject: Patching kernel sm8250 files arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
+
+Signed-off-by: John Doe <john.doe@somewhere.on.planet>
+---
+ arch/arm64/boot/dts/qcom/qrb5165-rb5.dts | 113 ++++++++++
+ 1 file changed, 113 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/qrb5165-rb5.dts b/arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
+index 16fcb5a08..a8fb44177 100644
+--- a/arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
++++ b/arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
+@@ -227,10 +227,93 @@ active-config0 {
+ 					hysteresis = <4000>;
+ 					type = "passive";
+ 				};
+ 			};
+ 		};
++
++		cluster1-thermal {
++			trips {
++				cluster1_alert1: trip-point1 {
++					temperature = <90000>;
++					hysteresis = <2000>;
++					type = "hot";
++				};
++
++				cluster1_fan0: trip-point2 {
++					temperature = <50000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan1: trip-point3 {
++					temperature = <55000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan2: trip-point4 {
++					temperature = <60000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan3: trip-point5 {
++					temperature = <65000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan4: trip-point6 {
++					temperature = <70000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan5: trip-point7 {
++					temperature = <75000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++
++				cluster1_fan6: trip-point8 {
++					temperature = <80000>;
++					hysteresis = <2000>;
++					type = "active";
++				};
++			};
++
++			cooling-maps {
++				map0 {
++					trip = <&cluster1_fan0>;
++					cooling-device = <&fan 0 1>;
++				};
++				map1 {
++					trip = <&cluster1_fan1>;
++					cooling-device = <&fan 1 2>;
++				};
++				map2 {
++					trip = <&cluster1_fan2>;
++					cooling-device = <&fan 2 3>;
++				};
++				map3 {
++					trip = <&cluster1_fan3>;
++					cooling-device = <&fan 3 4>;
++				};
++				map4 {
++					trip = <&cluster1_fan4>;
++					cooling-device = <&fan 4 5>;
++				};
++				map5 {
++					trip = <&cluster1_fan5>;
++					cooling-device = <&fan 5 6>;
++				};
++				map6 {
++					trip = <&cluster1_fan6>;
++					cooling-device = <&fan 6 7>;
++				};
++			};
++		};
+ 	};
+ 
+ 	vbat: vbat-regulator {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "VBAT";
+@@ -281,10 +364,30 @@ vreg_s4a_1p8: vreg-s4a-1p8 {
+ 		regulator-name = "vreg_s4a_1p8";
+ 		regulator-min-microvolt = <1800000>;
+ 		regulator-max-microvolt = <1800000>;
+ 		regulator-always-on;
+ 	};
++
++	fan_pwr: fan-pwr-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "fan_pwr";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++	};
++
++	fan: pwm-fan {
++		compatible = "pwm-fan";
++		/* level (0, 1, 2, 3, 4, 5, 6, 7) */
++		cooling-levels = <255 229 184 162 117 94 72 0>;
++		#cooling-cells = <2>;
++		fan-supply = <&fan_pwr>;
++		pwms = <&pm8150l_lpg 4 100000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwm_out_default>;
++	};
+ };
+ 
+ &adsp {
+ 	status = "okay";
+ 	firmware-name = "qcom/sm8250/adsp.mbn";
+@@ -928,10 +1031,20 @@ lt9611_rst_pin: lt9611-rst-state {
+ 
+ 		output-high;
+ 		input-disable;
+ 		power-source = <0>;
+ 	};
++
++	pwm_out_default: pwm-out-default-state {
++		pins = "gpio10";
++		function = "func1";
++
++		output-low;
++		input-disable;
++		bias-disable;
++		power-source = <0>;
++	};
+ };
+ 
+ &pm8150l_lpg {
+ 	status = "okay";
+ 
+-- 
+Created with Armbian build tools https://github.com/armbian/build
+
