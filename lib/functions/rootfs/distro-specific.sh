@@ -164,6 +164,10 @@ function create_sources_list_and_deploy_repo_key() {
 	APT_SIGNING_KEY_FILE="/usr/share/keyrings/armbian-archive-keyring.gpg"
 	gpg --dearmor < "${SRC}"/config/armbian.key > "${basedir}${APT_SIGNING_KEY_FILE}"
 
+	# lets link to the old file as armbian-config uses it and we can't set there to new file
+	# we user force linking as some old caches still exists
+	chroot "${basedir}" /bin/bash -c "ln -fs armbian-archive-keyring.gpg /usr/share/keyrings/armbian.gpg"
+
 	# lets keep old way for old distributions
 	if [[ "${RELEASE}" =~ (focal|bullseye) ]]; then
 		cp "${SRC}"/config/armbian.key "${basedir}"
@@ -192,7 +196,7 @@ function create_sources_list_and_deploy_repo_key() {
 	fi
 	cat <<- EOF > "${basedir}"/etc/apt/sources.list.d/armbian.sources
 	Types: deb
-	URIs: https://${armbian_mirror}
+	URIs: http://${armbian_mirror}
 	Suites: $RELEASE
 	Components: ${components[*]}
 	Signed-By: ${APT_SIGNING_KEY_FILE}
