@@ -16,6 +16,7 @@
 #include "pm7325.dtsi"
 #include "pm8350c.dtsi"
 #include "pmk8350.dtsi"
+#include "qcm6490-addons.dtsi"
 #include "pm7325b.dtsi"
 
 / {
@@ -54,34 +55,6 @@
 			wakeup-source;
 			debounce-interval = <15>;
 			linux,can-disable;
-		};
-	};
-
-	pmic-glink {
-		compatible = "qcom,sm8350-pmic-glink", "qcom,pmic-glink";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		orientation-gpios = <&tlmm 140 GPIO_ACTIVE_HIGH>;
-		qcom,thermal-mitigation = <3000000 1500000 1000000 500000>;
-
-		connector@0 {
-			compatible = "usb-c-connector";
-			reg = <0>;
-			power-role = "dual";
-			data-role = "dual";
-
-			ports {
-				#address-cells = <1>;
-				#size-cells = <0>;
-
-				port@0 {
-					reg = <0>;
-
-					pmic_glink_hs_in: endpoint {
-						remote-endpoint = <&usb_1_dwc3_hs>;
-					};
-				};
-			};
 		};
 	};
 
@@ -669,54 +642,6 @@
 	/delete-property/ cd-gpios;
 };
 
-/delete-node/ &usb_1_dwc3;
-
-&usb_1 {
-
-	reg = <0x0 0x0a600000 0x0 0x200000>;
-
-	interrupts-extended = <&intc GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>,
-			      <&intc GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>,
-			      <&pdc 14 IRQ_TYPE_LEVEL_HIGH>,
-			      <&pdc 15 IRQ_TYPE_EDGE_BOTH>,
-			      <&pdc 17 IRQ_TYPE_EDGE_BOTH>;
-	interrupt-names = "dwc_usb3",
-			  "hs_phy_irq",
-			  "dp_hs_phy_irq",
-			  "dm_hs_phy_irq",
-			  "ss_phy_irq";
-
-	iommus = <&apps_smmu 0xe0 0x0>;
-	snps,dis_u2_susphy_quirk;
-	snps,dis_enblslpm_quirk;
-	phys = <&usb_1_hsphy>, <&usb_1_qmpphy QMP_USB43DP_USB3_PHY>;
-	phy-names = "usb2-phy", "usb3-phy";
-	maximum-speed = "super-speed";
-	snps,dis-u2-entry-quirk;
-	snps,dis-u1-entry-quirk;
-	dr_mode = "otg";
-	usb-role-switch;
-	qcom,enable-rt;
-	wakeup-source;
-
-	status = "okay";
-
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		port@0 {
-			reg = <0>;
-			usb_1_dwc3_hs: endpoint {
-			};
-		};
-	};
-};
-
-&usb_1_dwc3_hs {
-	remote-endpoint = <&pmic_glink_hs_in>;
-};
-
 &usb_1_hsphy {
 	vdda-pll-supply = <&vreg_l10c_0p88>;
 	vdda18-supply = <&vreg_l1c_1p8>;
@@ -895,43 +820,6 @@
 				type = "passive";
 			};
 		};
-
-		cooling-maps {
-			map0 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&CPU4_idle 100 100>;
-			};
-
-			map1 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&CPU5_idle 100 100>;
-			};
-
-			map2 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&CPU6_idle 100 100>;
-			};
-
-			map3 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&CPU7_idle 100 100>;
-			};
-
-			map4 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&cdsp_sw 2 2>;
-			};
-
-			map5 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&modem_pa 2 2>;
-			};
-
-			map6 {
-				trip = <&b_bcl_lvl0>;
-				cooling-device = <&modem_tj 1 1>;
-			};
-		};
 	};
 
 	pm7250b-bcl-lvl1 {
@@ -1021,20 +909,6 @@
 		regulator-always-on;
 		regulator-enable-ramp-delay = <50000>;
 	};
-};
-
-&pcie0 {
-	perst-gpios = <&tlmm 87 GPIO_ACTIVE_LOW>;
-	pinctrl-0 = <&pcie0_reset_n>, <&pcie0_wake_n>, <&pcie0_clkreq_n>;
-	pinctrl-names = "default";
-	status = "okay";
-	vdda-supply = <&vreg_usb_hub0_rest>;
-};
-
-&pcie0_phy {
-	status = "okay";
-	vdda-phy-supply = <&vreg_l10c_0p88>;
-	vdda-pll-supply = <&vreg_l6b_1p2>;
 };
 
 &tlmm {
@@ -1264,19 +1138,11 @@
 	status = "disabled";
 };
 
-&lpass_wsa_macro {
-	status = "disabled";
-};
-
 &swr0 {
 	status = "disabled";
 };
 
 &swr1 {
-	status = "disabled";
-};
-
-&swr2 {
 	status = "disabled";
 };
 
