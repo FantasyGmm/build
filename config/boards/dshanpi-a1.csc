@@ -57,3 +57,43 @@ function post_family_tweaks__dshanpi-a1_create_gpio_group() {
 
 	return 0
 }
+
+function post_family_tweaks__dshanpi-a1_install_applications() {
+	display_alert "$BOARD" "Installing Chinese input method and applications for dshanpi-a1" "info"
+	
+	# Only install for desktop builds
+	if [[ "$BUILD_DESKTOP" == "yes" ]]; then
+		# Update package lists
+		chroot_sdcard apt-get update
+		
+		# Install ibus and ibus-libpinyin for Chinese input
+		chroot_sdcard apt-get install -y ibus ibus-libpinyin
+		
+		# Install cheese camera application
+		chroot_sdcard apt-get install -y cheese
+		
+		# Configure ibus environment variables
+		echo 'export GTK_IM_MODULE=ibus' >> $SDCARD/etc/environment
+		echo 'export QT_IM_MODULE=ibus' >> $SDCARD/etc/environment
+		echo 'export XMODIFIERS=@im=ibus' >> $SDCARD/etc/environment
+		
+		# Create autostart entry for ibus-daemon
+		mkdir -p $SDCARD/etc/skel/.config/autostart
+		cat > $SDCARD/etc/skel/.config/autostart/ibus.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=IBus
+Comment=Start IBus Input Method Framework
+Exec=ibus-daemon -drx
+Icon=ibus
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-Phase=Applications
+X-GNOME-AutoRestart=false
+X-GNOME-Autostart-Notify=true
+X-KDE-autostart-after=panel
+EOF
+	fi
+	
+	return 0
+}
