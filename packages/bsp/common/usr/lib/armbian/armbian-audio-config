@@ -17,6 +17,10 @@ mixer_cmds() {
 
 if [ -f "$HOME/.config/sound.conf" ]; then
 	alsactl restore -f "$HOME/.config/sound.conf"
+elif [ -f "/var/lib/alsa/asound.state" ]; then
+	# If system-wide state exists, assume it's handled by alsa-restore.service or restore it here
+	# Restoring here ensures it's applied before we skip the default config
+	alsactl restore -f "/var/lib/alsa/asound.state"
 else
 	# get card num
 	#card=`echo $1 | sed 's/[^0-9]*//g'`

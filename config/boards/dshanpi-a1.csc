@@ -12,17 +12,25 @@ BOOT_LOGO="desktop"
 BOOT_FDT_FILE="rockchip/rk3576-100ask-dshanpi-a1.dtb"
 BOOT_SCENARIO="spl-blobs"
 IMAGE_PARTITION_TABLE="gpt"
+DESKTOP_AUTOLOGIN="yes"
 
-# Enable Rockchip multimedia packages (MPP, RGA, GStreamer)
-ENABLE_EXTENSIONS="rockchip-multimedia"
+# Define initial audio state file
+ASOUND_STATE="asound.state.dshanpi-a1"
+
+# Enable Rockchip multimedia packages (MPP, RGA, GStreamer) and DShanPI Camera
+ENABLE_EXTENSIONS="rockchip-multimedia,dshanpi-camera"
+
+# Disable official Armbian apt repository to avoid unwanted kernel updates
+SKIP_ARMBIAN_REPO="yes"
 
 function post_family_tweaks__dshanpi-a1_naming_audios() {
 	display_alert "$BOARD" "Renaming dshanpi-a1 audios" "info"
 
 	mkdir -p $SDCARD/etc/udev/rules.d/
-	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmi0-sound", ENV{SOUND_DESCRIPTION}="HDMI0 Audio"' > $SDCARD/etc/udev/rules.d/90-naming-audios.rules
+	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-es8388-sound", ENV{SOUND_DESCRIPTION}="ES8388 Audio"' > $SDCARD/etc/udev/rules.d/90-naming-audios.rules
+	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmi-sound", ENV{SOUND_DESCRIPTION}="HDMI0 Audio"' >> $SDCARD/etc/udev/rules.d/90-naming-audios.rules
 	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-dp0-sound", ENV{SOUND_DESCRIPTION}="DP0 Audio"' >> $SDCARD/etc/udev/rules.d/90-naming-audios.rules
-	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-es8388-sound", ENV{SOUND_DESCRIPTION}="ES8388 Audio"' >> $SDCARD/etc/udev/rules.d/90-naming-audios.rules
+	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmiin-sound", ENV{SOUND_DESCRIPTION}="HDMI IN Audio"' >> $SDCARD/etc/udev/rules.d/90-naming-audios.rules
 
 	return 0
 }
@@ -58,42 +66,14 @@ function post_family_tweaks__dshanpi-a1_create_gpio_group() {
 	return 0
 }
 
-function post_family_tweaks__dshanpi-a1_install_applications() {
-	display_alert "$BOARD" "Installing Chinese input method and applications for dshanpi-a1" "info"
-	
-	# Only install for desktop builds
-	if [[ "$BUILD_DESKTOP" == "yes" ]]; then
-		# Update package lists
-		chroot_sdcard apt-get update
-		
-		# Install ibus and ibus-libpinyin for Chinese input
-		chroot_sdcard apt-get install -y ibus ibus-libpinyin
-		
-		# Install cheese camera application
-		chroot_sdcard apt-get install -y cheese
-		
-		# Configure ibus environment variables
-		echo 'export GTK_IM_MODULE=ibus' >> $SDCARD/etc/environment
-		echo 'export QT_IM_MODULE=ibus' >> $SDCARD/etc/environment
-		echo 'export XMODIFIERS=@im=ibus' >> $SDCARD/etc/environment
-		
-		# Create autostart entry for ibus-daemon
-		mkdir -p $SDCARD/etc/skel/.config/autostart
-		cat > $SDCARD/etc/skel/.config/autostart/ibus.desktop << EOF
-[Desktop Entry]
-Type=Application
-Name=IBus
-Comment=Start IBus Input Method Framework
-Exec=ibus-daemon -drx
-Icon=ibus
-Terminal=false
-NoDisplay=true
-X-GNOME-Autostart-Phase=Applications
-X-GNOME-AutoRestart=false
-X-GNOME-Autostart-Notify=true
-X-KDE-autostart-after=panel
+function post_family_tweaks__dshanpi-a1_pulseaudio_config() {
+	# Fix PulseAudio input source for ES8388 using modular config
+	# This is cleaner than editing default.pa and avoids conflicts
+	display_alert "$BOARD" "Installing PulseAudio config for ES8388" "info"
+	mkdir -p $SDCARD/etc/pulse/default.pa.d/
+	cat > $SDCARD/etc/pulse/default.pa.d/rockchip-es8388.pa << EOF
+load-module module-alsa-source device=hw:rockchipes8388 source_name=es8388_input source_properties=device.description='ES8388 Analog Input'
 EOF
-	fi
-	
+
 	return 0
 }
