@@ -1,0 +1,162 @@
+/*
+***** CM5 mipi-dsi *******
+*/
+&backlight {
+	pwms = <&pwm0_2ch_0 0 25000 0>;
+
+};
+
+&pwm0_2ch_0 {
+        status = "okay";
+        pinctrl-0 = <&pwm0m0_ch0>;
+};
+
+&dsi {
+	status = "okay";
+	rockchip,lane-rate = <480>;
+
+	dsi_panel: panel@0 {
+		status = "okay";
+		compatible = "simple-panel-dsi";
+		power-supply = <&vcc3v3_lcd_n>;
+		reg = <0>;
+		backlight = <&backlight>;
+
+		prepare-delay-ms = <10>;
+		reset-delay-ms = <40>;
+		init-delay-ms = <40>;
+		enable-delay-ms = <40>;
+		disable-delay-ms = <50>;
+		unprepare-delay-ms = <40>;
+
+		reset-gpios = <&gpio0 RK_PD1 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+
+		width-mm = <65>;
+		height-mm = <48>;
+
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+                              MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_NO_EOT_PACKET)>;
+
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes = <4>;
+
+		panel-init-sequence = [
+				39 00 04 df 91 68 f9
+				15 00 02 de 00
+				//15 00 02 C2 30  //bist
+				39 00 03 b2 00 7e
+				39 00 03 b3 00 7e
+				39 00 07 c1 00 10 00 00 00 00
+				39 00 08 bb 02 24 07 61 19 44 44
+				39 00 03 be 1a f2
+				39 00 0f c3 10 17 5a 17 5a 05 05 05 05 15 15 31 05 df
+				39 00 08 c4 11 80 00 df 09 06 14
+				39 00 18 ce 00 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 03 0f 03
+				39 00 0a cf 00 01 40 01 ca 01 ca 01 ca
+				39 00 18 d0 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 03 01 05 07 09 0b 1e 15 1f 1f 15 1f
+				39 00 18 d1 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 02 00 04 06 08 0a 1e 15 1f 1f 15 1f
+				39 00 18 d2 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 00 02 0a 08 06 04 1f 15 1f 1f 15 1e
+				39 00 18 d3 00 1f 1f 1f 1f 1f 1f 1f 1f 1f 1f 01 03 0b 09 07 05 1f 15 1f 1f 15 1e
+				39 00 26 d4 30 00 00 04 00 06 00 00 00 00 00 03 03 00 11 00 01 c0 04 01 01 11 80 01 c0 05 01 01 00 00 00 04 00 06 18 02 e3
+				39 00 09 d5 68 73 00 08 08 00 03 00
+				39 00 07 b7 00 d8 00 00 d8 00
+				39 00 27 c8 7f 69 5a 4e 4a 3b 40 2a 44 43 44 63 51 59 4c 48 3a 28 0f 7f 69 5a 4e 4a 3b 40 2a 44 43 44 63 51 59 4c 48 3a 28 0f
+				15 00 02 de 02
+				39 00 05 bb 00 5b 5c 41
+				39 00 04 b5 00 5a 0a
+				15 00 02 c6 22
+				15 00 02 d7 12
+				39 00 03 E7 00 00
+				15 00 02 DE 04
+				15 00 02 CC 02
+				15 00 02 E7 01
+				15 00 02 DE 00
+				15 00 02 35 00
+				05 78 01 11
+				05 14 01 29
+				];
+
+		panel-exit-sequence = [
+			05 00 01 28
+			05 78 01 10
+		];
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+				clock-frequency = <50000000>;
+				hactive = <1024>;
+				vactive = <768>;
+				hfront-porch = <10>;
+				hsync-len = <5>;
+				hback-porch = <20>;
+				vfront-porch = <5>;
+				vsync-len = <5>;
+				vback-porch = <10>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in_dsi: endpoint {
+					remote-endpoint = <&dsi_out_panel>;
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+};
+
+
+
+/*
+**** touch ****
+*/
+
+&i2c4 {
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c4m0_xfer &tp_rst &tp_irq>;
+
+		gt911@5d {
+			compatible = "goodix,gt911";
+			reg = <0x5d>;
+			interrupt-parent = <&gpio4>;
+			interrupts = <RK_PC6 IRQ_TYPE_EDGE_FALLING>;
+			reset-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
+			pinctrl-names = "default";
+		};
+};
+
+&pinctrl {
+		touchscreen {
+				tp_rst:tp-rst {
+						rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_up>;
+				};
+
+				tp_irq:tp-irq {
+						rockchip,pins = <4 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
+				};
+		};
+};
