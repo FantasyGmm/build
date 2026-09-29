@@ -27,6 +27,11 @@ The entrypoint `compile.sh` dispatches into the framework in `lib/`. Build-time 
 ./compile.sh BOARD=orangepi5 BRANCH=current RELEASE=trixie BUILD_MINIMAL=yes KERNEL_CONFIGURE=no
 ```
 
+### DShanPI A1 CM5
+
+[中文 / English adaptation, device-tree, build, and validation guide](docs/dshanpi-a1-cm5/README.md) • [Repository maintenance skill](.agents/skills/guard-dshanpi-a1-cm5/SKILL.md)
+
+
 ## Build Host Requirements
 
 ### Hardware
