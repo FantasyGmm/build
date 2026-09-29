@@ -1,0 +1,21 @@
+# Every testing snapshot must explicitly provide one reviewed copy of each
+# package/architecture pair below. U-Boot and linux-libc-dev are deliberately
+# excluded from the normal update repository.
+base-files arm64
+armbian-bsp-cli-dshanpi-a1-cm5-vendor arm64
+armbian-bsp-desktop-dshanpi-a1-cm5-vendor arm64
+linux-image-vendor-rk3576-dshanpi-a1-cm5 arm64
+linux-dtb-vendor-rk3576-dshanpi-a1-cm5 arm64
+linux-headers-vendor-rk3576-dshanpi-a1-cm5 arm64
+aic8800-firmware all
+aic8800-sdio-dkms all
+camera-engine-rkaiq arm64
+gstreamer1.0-rockchip1 arm64
+librockchip-mpp1 arm64
+librockchip-mpp-dev arm64
+librockchip-vpu0 arm64
+rockchip-mpp-demos arm64
+librga2 arm64
+librga-dev arm64
+dshanpi-archive-keyring all
+dshanpi-a1-cm5-repository all

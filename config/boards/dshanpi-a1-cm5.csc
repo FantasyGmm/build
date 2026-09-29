@@ -20,6 +20,9 @@ ASOUND_STATE="asound.state.dshanpi-a1"
 
 # Enable Rockchip multimedia packages, DShanPI Camera and AIC8800 SDIO support
 ENABLE_EXTENSIONS="rockchip-multimedia,dshanpi-cm5-camera,dshanpi-aic8800"
+if [[ "${DSHANPI_INSTALL_REPOSITORY:-no}" == "yes" ]]; then
+	ENABLE_EXTENSIONS+=",dshanpi-repository"
+fi
 PACKAGE_LIST_BOARD="rfkill bluetooth bluez bluez-tools"
 
 # Disable official Armbian apt repository to avoid unwanted kernel updates
