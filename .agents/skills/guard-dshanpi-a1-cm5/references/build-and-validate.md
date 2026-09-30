@@ -57,7 +57,7 @@ sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
 本仓库不生成 Packages/Release/InRelease，不保存签名私钥，也不执行 testing/stable 发布。`dshanpi-build` 收集这里产生的 deb、构建精确版本元包、签名 APT 元数据并上传下载站。stable 晋级必须复用 testing 已验证包的 SHA-256，不能重新编译；U-Boot 和 `linux-libc-dev` 不进入在线升级集合。
 
 2026-09-30 的 overlay 软件门禁记录：内核构建 UUID
-`b1690249-a7f9-4a71-b8a8-040b6cba748f`，revision
+`f6ef3b63-5ffe-43b2-a6da-14dab11cc986`，revision
 `25.11.0-trunk.20260930.1`。从生成的 DTB deb 解包后，主 DTB 与
 `dshanpi-a1-cm5-pcie1.dtbo` 可由 `fdtoverlay` 成功合并；目标 USB1 节点为
 `disabled`，Combo PHY1 与 PCIe1 为 `okay`。该结果不替代真机链路验证。

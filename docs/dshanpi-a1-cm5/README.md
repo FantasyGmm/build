@@ -98,7 +98,7 @@ sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
 ### Overlay 软件验证记录（2026-09-30）
 
 - Revision：`25.11.0-trunk.20260930.1`
-- Kernel build UUID：`b1690249-a7f9-4a71-b8a8-040b6cba748f`
+- Kernel build UUID：`f6ef3b63-5ffe-43b2-a6da-14dab11cc986`
 - 生成的 `linux-dtb-vendor-rk3576-dshanpi-a1-cm5` 包同时包含主 DTB 和
   `rockchip/overlay/dshanpi-a1-cm5-pcie1.dtbo`。
 - 使用 `fdtoverlay` 合并后，`usb_drd1_dwc3`、`u2phy1_otg`、`u2phy1` 为
