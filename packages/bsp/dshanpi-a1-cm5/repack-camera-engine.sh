@@ -14,7 +14,7 @@ usage() {
 [[ $# -le 3 ]] || usage
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-workspace=$(cd "${script_dir}/../.." && pwd)
+workspace=$(cd "${script_dir}/../../.." && pwd)
 source_deb=${1:-${workspace}/debs/camera/camera_engine_rkaiq_rk3576_arm64.deb}
 output_dir=${2:-${workspace}/output/dshanpi-packages}
 version=${3:-6.6.3+dshanpi1}
@@ -23,7 +23,7 @@ source_date_epoch="1687086060"
 
 [[ -f "$source_deb" ]] || { echo "Missing camera package: $source_deb" >&2; exit 2; }
 [[ "$version" =~ ^[0-9] ]] || { echo "Package version must begin with a digit: $version" >&2; exit 2; }
-dpkg --validate-version "$version" 2> /dev/null || { echo "Invalid Debian package version: $version" >&2; exit 2; }
+dpkg --validate-version "$version" 2>/dev/null || { echo "Invalid Debian package version: $version" >&2; exit 2; }
 command -v patchelf >/dev/null || { echo "patchelf is required" >&2; exit 2; }
 
 actual_source_sha256=$(sha256sum "$source_deb" | awk '{print $1}')
@@ -56,9 +56,6 @@ package_root="$work_dir/package"
 mkdir -p "$package_root/DEBIAN"
 dpkg-deb --extract "$source_deb" "$package_root"
 
-# The vendor archive ships every directory and nearly every regular file as
-# world-writable. Start from conservative package-wide modes, then restore the
-# three programs which must be executable.
 find "$package_root" -type d -exec chmod 0755 {} +
 find "$package_root" -type f -exec chmod 0644 {} +
 chmod 0755 \
@@ -66,7 +63,6 @@ chmod 0755 \
 	"$package_root/usr/bin/rkaiq_3A_server" \
 	"$package_root/usr/bin/rkaiq_tool_server"
 
-# Remove the vendor build machine's /home/... RPATH from all ELF payloads.
 while IFS= read -r -d '' payload; do
 	if file --brief "$payload" | grep -q '^ELF '; then
 		patchelf --remove-rpath "$payload"
@@ -114,7 +110,6 @@ EOF
 )
 chmod 0644 "$package_root/DEBIAN/control" "$package_root/DEBIAN/md5sums"
 
-# Keep this derived package byte-for-byte reproducible across builds.
 find "$package_root" -exec touch -h -d "@${source_date_epoch}" {} +
 export SOURCE_DATE_EPOCH="$source_date_epoch"
 

@@ -1,8 +1,0 @@
-# One anchored extended regular expression per line. Blank lines and comments
-# are ignored. This repository is intentionally isolated to DShanPI A1 CM5.
-^base-files$
-^armbian-bsp-(cli|desktop)-dshanpi-a1-cm5-vendor$
-^linux-(image|dtb|headers)-vendor-rk3576-dshanpi-a1-cm5$
-^(aic8800-(firmware|sdio-dkms)|camera-engine-rkaiq)$
-^(gstreamer1\.0-rockchip1|librockchip-(mpp1|mpp-dev|vpu0)|rockchip-mpp-demos|librga2|librga-dev)$
-^dshanpi-(archive-keyring|a1-cm5-repository)$

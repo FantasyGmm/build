@@ -111,13 +111,12 @@ shell_files=(
 	config/boards/dshanpi-a1-cm5.csc
 	extensions/dshanpi-aic8800.sh
 	extensions/dshanpi-cm5-camera.sh
+	extensions/dshanpi-dspi-config.sh
+	extensions/dshanpi-release-meta.sh
 	extensions/dshanpi-repository.sh
 	extensions/rockchip-multimedia.sh
 	lib/functions/general/apt-utils.sh
-	tools/dshanpi-repository/build-client-packages.sh
-	tools/dshanpi-repository/prepare-incoming.sh
-	tools/dshanpi-repository/publish-local.sh
-	tools/dshanpi-repository/repack-camera-engine.sh
+	packages/bsp/dshanpi-a1-cm5/repack-camera-engine.sh
 	.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh
 	.agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh
 )

@@ -23,26 +23,22 @@ git diff --check
 
 常用变体：只编译内核可使用 Armbian 的 `kernel` target；需要调整内核配置时显式设置 `KERNEL_CONFIGURE=yes`。不要把 CM5 包重新命名成原 A1 的 `rk35xx` 包。
 
-### 3. 带受控 APT 源的发布镜像
+### 3. 由 dshanpi-build 编排的发布镜像
 
-每次内容变化必须使用唯一且单调递增的 Debian revision，例如：
+每次内容变化必须使用唯一且单调递增的 Debian revision。APT 客户端、dspi-config 和系统版本元包均由外部 `dshanpi-build` 仓库预先制作，本仓库只安装传入的精确文件：
 
 ```bash
-REVISION=25.11.0-trunk.20260929.1
-tools/dshanpi-repository/build-client-packages.sh public.asc \
-  https://packages.example.com \
-  output/dshanpi-repository/client-packages/2026.09.2 \
-  1:2026.09.2
-
 ./compile.sh build BOARD=dshanpi-a1-cm5 BRANCH=vendor \
   BUILD_DESKTOP=yes DESKTOP_APPGROUPS_SELECTED= \
   DESKTOP_ENVIRONMENT=gnome DESKTOP_ENVIRONMENT_CONFIG_NAME=config_base \
   KERNEL_CONFIGURE=no PREFER_DOCKER=no RELEASE=noble \
-  REVISION="$REVISION" DSHANPI_INSTALL_REPOSITORY=yes \
-  DSHANPI_REPO_CLIENT_PACKAGES_DIR="$PWD/output/dshanpi-repository/client-packages/2026.09.2"
+  REVISION=25.11.0-trunk.20260930.1 \
+  DSHANPI_DSPI_CONFIG_DEB=/absolute/path/to/dspi-config.deb \
+  DSHANPI_REPO_CLIENT_PACKAGES_DIR=/absolute/path/to/client-packages \
+  DSHANPI_RELEASE_META_DEB=/absolute/path/to/release-meta.deb
 ```
 
-仓库客户端是 opt-in；普通开发镜像不会自动加入。不要在 Debian maintainer script 内嵌套运行 `apt-mark`/`dpkg`。
+三项路径均为 opt-in；普通开发镜像不依赖外部发行产物。不要在 Debian maintainer script 内嵌套运行 `apt-mark`/`dpkg`。
 
 ### 4. 软件验证
 
@@ -56,21 +52,15 @@ sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
 
 普通开发镜像不带仓库客户端时省略 `--require-repository`。若改动了触摸、摄像头以外的总线或 GPIO，必须再用 `dtc`/`fdtget` 针对最终 DTB 核对相关节点；通用检查脚本不会替代任务专属的 binding/引脚验证。供应商 schema 完整时可增加目标 DTB 的 `dtbs_check`，但不能把缺失 schema 导致的结果当作真机验证。
 
-### 5. 签名仓库
+### 5. APT 发布边界
 
-```bash
-tools/dshanpi-repository/prepare-incoming.sh \
-  "$REVISION" output/dshanpi-repository/client-packages/2026.09.2
+本仓库不生成 Packages/Release/InRelease，不保存签名私钥，也不执行 testing/stable 发布。`dshanpi-build` 收集这里产生的 deb、构建精确版本元包、签名 APT 元数据并上传下载站。stable 晋级必须复用 testing 已验证包的 SHA-256，不能重新编译；U-Boot 和 `linux-libc-dev` 不进入在线升级集合。
 
-export REPO_GPG_KEYID=<完整指纹>
-tools/dshanpi-repository/publish-local.sh publish \
-  "$REVISION" "output/dshanpi-repository/incoming/$REVISION"
-
-# 真机升级、重启、回滚全部通过后：
-tools/dshanpi-repository/publish-local.sh promote
-```
-
-`publish` 只生成 testing，要求 18 个 package/architecture 对齐全，拒绝 U-Boot、`linux-libc-dev`、版本回退、不安全权限和构建机 RPATH。`promote` 验证签名与 SHA-256 后复制完全相同的 snapshot 到 stable。
+2026-09-30 的 overlay 软件门禁记录：内核构建 UUID
+`b1690249-a7f9-4a71-b8a8-040b6cba748f`，revision
+`25.11.0-trunk.20260930.1`。从生成的 DTB deb 解包后，主 DTB 与
+`dshanpi-a1-cm5-pcie1.dtbo` 可由 `fdtoverlay` 成功合并；目标 USB1 节点为
+`disabled`，Combo PHY1 与 PCIe1 为 `okay`。该结果不替代真机链路验证。
 
 ### 6. 真机矩阵
 
@@ -85,8 +75,8 @@ tools/dshanpi-repository/publish-local.sh promote
 
 ## English workflow
 
-Run the source gate before and after edits. Build the Noble/vendor GNOME image with `BOARD=dshanpi-a1-cm5`; use a unique monotonic `REVISION` for publishable packages. Enable the repository only with `DSHANPI_INSTALL_REPOSITORY=yes` and an exact two-package client directory.
+Run the source gate before and after edits. Build the Noble/vendor image with `BOARD=dshanpi-a1-cm5`; use a unique monotonic `REVISION` for publishable packages. Official releases are orchestrated by `dshanpi-build`, which passes exact local dspi-config, repository-client, and release-meta packages into this build.
 
-Verify the image checksum and run `inspect-cm5-image.sh` read-only. Prepare exactly one reviewed candidate for each required package/architecture pair, publish only to signed testing, complete the physical-hardware matrix, and promote the byte-identical snapshot to stable. Software validation does not substitute for boot, I/O, camera, radio, upgrade, reboot, and rollback testing on the board.
+Verify the image checksum and run `inspect-cm5-image.sh` read-only. Package-set validation, APT signing, testing publication, and stable promotion live in `dshanpi-build`, not ArmBianOS. Software validation does not substitute for boot, I/O, camera, radio, upgrade, reboot, and rollback testing on the board.
 
 Do not create a GitHub Release until the user approves the exact publication parameters. For an approved release, keep the raw image, compress with `--keep`, verify the checksum, and run the release-mode gate.

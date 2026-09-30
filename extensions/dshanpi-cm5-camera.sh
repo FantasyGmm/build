@@ -14,7 +14,7 @@ function post_repo_customize_image__z_dshanpi_cm5_camera_install() {
 	local iq_cache="$SRC/cache/${iq_name}"
 
 	display_alert "Repacking reviewed camera engine package" "$camera_version" "info"
-	"$SRC/tools/dshanpi-repository/repack-camera-engine.sh" \
+	"$SRC/packages/bsp/dshanpi-a1-cm5/repack-camera-engine.sh" \
 		"$SRC/debs/camera/camera_engine_rkaiq_rk3576_arm64.deb" \
 		"$camera_output_dir" "$camera_version"
 

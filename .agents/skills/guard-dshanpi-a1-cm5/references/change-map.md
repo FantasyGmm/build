@@ -11,7 +11,7 @@
 - `patch/u-boot/legacy/u-boot-radxa-rk35xx/board_dshanpi-a1/u-boot-add-dshanpi-a1-rk3576-dts.patch`
 - `patch/u-boot/legacy/u-boot-radxa-rk35xx/defconfig/dshanpi-a1-rk3576_defconfig`
 
-已落地的主要提交：`38d6da137`（新增 A1 CM5 板级支持）、`96e43871d`（新增签名仓库流程）、`897e317bb`（加固相机/AIC/完整包集和 testing→stable 工作流）。后续提交应继续保持板级支持、仓库工具、文档/skill 的职责清晰。
+已落地的主要提交：`38d6da137`（新增 A1 CM5 板级支持）、`96e43871d` 和 `897e317bb`（早期仓库实验）。APT 构建与发布现已迁往独立的 `dshanpi-build`；本仓库只保留板级源码和镜像构建所需的预制包安装接口。
 
 ### CM5 文件职责
 
@@ -23,8 +23,10 @@
 | `extensions/dshanpi-aic8800.sh` | 固定版本/校验和下载缓存、固件和 DKMS 安装 |
 | `extensions/dshanpi-cm5-camera.sh` | 安全重打包 RKAIQ、IQ 校验和安装 |
 | `extensions/rockchip-multimedia.sh` | MPP/RGA/GStreamer；共享修改必须保留原 A1 行为 |
-| `extensions/dshanpi-repository.sh` | 可选安装签名仓库客户端 |
-| `tools/dshanpi-repository/` | 客户端包、完整 incoming、审计、签名 testing、stable promotion |
+| `extensions/dshanpi-dspi-config.sh` | 安装由 `dshanpi-build` 提供的 dspi-config 包 |
+| `extensions/dshanpi-repository.sh` | 安装由 `dshanpi-build` 提供的 keyring/source 客户端包 |
+| `extensions/dshanpi-release-meta.sh` | 安装由 `dshanpi-build` 提供的系统版本元包 |
+| `packages/bsp/dshanpi-a1-cm5/` | dspi-config 板卡清单及相机 vendor 包安全重打包工具 |
 | `lib/functions/general/apt-utils.sh` | 仅限 CM5 的 APT metadata fallback |
 
 ### 设计决定
@@ -33,7 +35,7 @@
 - 共享 U-Boot defconfig 不改；CM5 hook 只修改构建工作树中的 `.config`。
 - 相机供应商 deb 会被确定性重打包：修正 world-writable mode、去掉 build-host RPATH、加入校验与版权说明。
 - AIC8800 包固定版本和 SHA-256，缓存命中前仍校验；下载使用原子临时文件和低速超时。
-- APT 仓库只接受 CM5 allowlist，不包含 U-Boot 与 `linux-libc-dev`；客户端源默认不自动升级。
+- APT 包集、allowlist、签名和 stable/testing 状态由 `dshanpi-build` 维护；U-Boot 与 `linux-libc-dev` 不进入在线升级集合。
 - 带 sticky bit 的标准 `1777` 目录合法；普通 world-writable 文件、非 sticky world-writable 目录和 set-id payload 会被拒绝。
 
 ### 已知限制

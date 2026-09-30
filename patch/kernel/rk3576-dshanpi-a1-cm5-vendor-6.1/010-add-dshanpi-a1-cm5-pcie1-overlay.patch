@@ -17,14 +17,11 @@ diff --git a/arch/arm64/boot/dts/rockchip/overlay/Makefile b/arch/arm64/boot/dts
 index 111111111111..222222222222 100644
 --- a/arch/arm64/boot/dts/rockchip/overlay/Makefile
 +++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile
-@@ -95,6 +95,7 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
- 	rockchip-rk3588-panthor-gpu.dtbo \
- 	rk3528-rock-2-enable-pcie.dtbo \
- 	rk3566-roc-pc-sata2.dtbo \
-+	dshanpi-a1-cm5-pcie1.dtbo \
- 	rk3576-can1-m1.dtbo \
- 	rk3576-i2c0-m1.dtbo \
- 	rk3576-i2c1-m0.dtbo \
+@@ -288,2 +288,4 @@ targets += $(dtbo-y) $(dtbotxt-y)
+ always-y		:= $(dtbo-y) $(dtbotxt-y)
++dtbo-$(CONFIG_ARCH_ROCKCHIP) += dshanpi-a1-cm5-pcie1.dtbo
++always-y		+= dshanpi-a1-cm5-pcie1.dtbo
+ clean-files		:= *.dtbo
 diff --git a/arch/arm64/boot/dts/rockchip/overlay/dshanpi-a1-cm5-pcie1.dts b/arch/arm64/boot/dts/rockchip/overlay/dshanpi-a1-cm5-pcie1.dts
 new file mode 100644
 index 000000000000..333333333333

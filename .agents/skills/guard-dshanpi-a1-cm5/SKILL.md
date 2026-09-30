@@ -38,14 +38,15 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
      /absolute/path/to/image.img
    ```
 
-   Add `--require-repository` only for a release image built with `DSHANPI_INSTALL_REPOSITORY=yes`. For a routing change, also inspect the compiled DTB with `dtc`/`fdtget`; the generic inspector cannot prove task-specific pin choices.
+   Add `--require-repository` only for a release image built with client packages supplied by `dshanpi-build`. For a routing change, also inspect the compiled DTB with `dtc`/`fdtget`; the generic inspector cannot prove task-specific pin choices.
 6. Treat physical-board boot, display/touch, Ethernet, USB, audio, Wi-Fi/Bluetooth, all three cameras, thermal fan, upgrade, reboot, and rollback tests as distinct from software validation.
 
 ## Commit, push, and publish
 
 - Separate board/device-tree changes from optional repository tooling and documentation when practical.
 - Before committing or pushing, show the files and explain semantic A1-versus-CM5 impact. Push a feature branch, then confirm the remote ref equals the intended commit.
-- Publish packages to `testing` only after the complete-set and signature checks pass. Promote the exact signed testing snapshot; never publish directly to stable.
+- Package assembly, APT signing, and testing/stable publication belong to the external `dshanpi-build` repository. ArmBianOS only consumes exact prebuilt client/meta packages while creating an image.
+- Publish packages to `testing` only after the complete-set and signature checks pass. Promote the exact tested package cohort; never rebuild packages for stable.
 - Do not create or alter a GitHub Release without explicit approval for the exact tag, target commit, title, prerelease state, and asset list.
 - For an approved Release, retain the `.img`, create a `.img.gz` with `--keep`, verify its checksum, set `DSHANPI_RELEASE_APPROVED=yes`, and run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh release <repo> <image.img.gz>` before upload.
 
