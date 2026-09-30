@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 # Install the prebuilt keyring and board source packages supplied by
-# dshanpi-build. ArmBianOS never creates or signs APT repository metadata.
-function post_repo_customize_image__install_dshanpi_repository() {
+# dshanpi-build. This deliberately runs after Armbian's final apt update so a
+# new product release can be built before its repository is published. The
+# completed image still ships with the DShanPI source enabled by default.
+# ArmBianOS never creates or signs APT repository metadata.
+function post_post_debootstrap_tweaks__install_dshanpi_repository() {
 	local package_dir="${DSHANPI_REPO_CLIENT_PACKAGES_DIR:?DSHANPI_REPO_CLIENT_PACKAGES_DIR is required}"
 	local keyring repository
 	local -a keyrings repositories
