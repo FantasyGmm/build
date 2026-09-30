@@ -1,0 +1,2 @@
+# token|dtbo-basename|title|description|conflicts
+pcie1|dshanpi-a1-cm5-pcie1|PCIe1 模式|禁用共享 USB1 主机路径并启用 PCIe1；重启后生效|

@@ -26,6 +26,7 @@
 - 显示：四 lane MIPI DSI，1024×768，PWM0 背光。
 - 音频：ES8388 耳机/扬声器/双麦路由，GPIO4_B5 插拔检测，GPIO4_B4 模拟开关门控；释放 GPIO1_D0 给 SAI2。
 - USB/PCIe：默认启用 USB2 OTG1 hub 路径并禁用 PCIe1，两者不可同时启用；PCIe0 保留。
+- DT overlay：`dshanpi-a1-cm5-pcie1.dtbo` 可显式禁用 USB1 完整路径并启用 PCIe1；基础 DTB 始终保持已验证的 USB1 默认状态。
 - 其他：双千兆网口、UFS/eMMC/SD、USB-C/DP、PWM 风扇、WS2812、BT SCO。
 
 ### 修改规则
@@ -36,7 +37,8 @@
 4. 若覆盖旧节点，显式 `status = "disabled"` 或 `/delete-property/`，并保留解释原因的注释。
 5. 不要修改原 A1 的板文件、相机扩展、U-Boot DTS 补丁和共享 defconfig。
 6. 内核 DT 与 U-Boot DT 分开维护：U-Boot 只保留启动所需的最小设备树；CM5 板 hook 在临时 `.config` 中选择它。
-7. 当前 `sdio-pwrseq` 的 `clocks = <&rk806 1>` 会触发供应商树的 `#clock-cells` 非致命告警。没有硬件和 binding 证据时不要猜测性修改。
+7. 可选硬件组合优先使用 overlay；overlay 必须保持基础 DTB 可独立启动，并由 BSP 清单提供给 dspi-config。
+8. 当前 `sdio-pwrseq` 的 `clocks = <&rk806 1>` 会触发供应商树的 `#clock-cells` 非致命告警。没有硬件和 binding 证据时不要猜测性修改。
 
 本仓库未包含所引用的 CM5 底板原理图；涉及新引脚迁移时必须由维护者提供对应 revision 的外部原理图或等价硬件证据。供应商树的自定义 binding/schema 也可能不完整，因此完整 Armbian 构建中的 DT 编译是最低门槛；若工作树具备完整 schema，再额外执行对应 DTB 的 `dtbs_check`，并逐条区分真实错误与已记录的供应商告警。
 

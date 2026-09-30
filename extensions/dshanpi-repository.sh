@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 
-# Opt-in extension for release builds.  Keep it out of board defaults so the
-# immutable A1 board definition and developer images do not depend on a local
-# signing environment.  Release builds set DSHANPI_INSTALL_REPOSITORY=yes and
-# provide the two packages produced by
-# tools/dshanpi-repository/build-client-packages.sh.
+# Install the prebuilt keyring and board source packages supplied by
+# dshanpi-build. ArmBianOS never creates or signs APT repository metadata.
 function post_repo_customize_image__install_dshanpi_repository() {
-	local package_dir="${DSHANPI_REPO_CLIENT_PACKAGES_DIR:-${SRC}/output/dshanpi-repository/client-packages}"
+	local package_dir="${DSHANPI_REPO_CLIENT_PACKAGES_DIR:?DSHANPI_REPO_CLIENT_PACKAGES_DIR is required}"
 	local keyring repository
 	local -a keyrings repositories
 	[[ -d "$package_dir" ]] ||

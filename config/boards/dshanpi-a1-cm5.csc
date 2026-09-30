@@ -8,6 +8,7 @@ KERNEL_TEST_TARGET="vendor"
 FULL_DESKTOP="yes"
 BOOT_LOGO="desktop"
 BOOT_FDT_FILE="rockchip/rk3576-100ask-dshanpi-a1-cm5.dtb"
+OVERLAY_PREFIX="dshanpi-a1-cm5"
 BOOT_SCENARIO="spl-blobs"
 DDR_BLOB="rk35/rk3576_ddr_lp4_2112MHz_lp5_2736MHz_v1.09.bin"
 BL31_BLOB="rk35/rk3576_bl31_v1.20.elf"
@@ -20,8 +21,14 @@ ASOUND_STATE="asound.state.dshanpi-a1"
 
 # Enable Rockchip multimedia packages, DShanPI Camera and AIC8800 SDIO support
 ENABLE_EXTENSIONS="rockchip-multimedia,dshanpi-cm5-camera,dshanpi-aic8800"
-if [[ "${DSHANPI_INSTALL_REPOSITORY:-no}" == "yes" ]]; then
+if [[ -n "${DSHANPI_DSPI_CONFIG_DEB:-}" ]]; then
+	ENABLE_EXTENSIONS+=",dshanpi-dspi-config"
+fi
+if [[ -n "${DSHANPI_REPO_CLIENT_PACKAGES_DIR:-}" ]]; then
 	ENABLE_EXTENSIONS+=",dshanpi-repository"
+fi
+if [[ -n "${DSHANPI_RELEASE_META_DEB:-}" ]]; then
+	ENABLE_EXTENSIONS+=",dshanpi-release-meta"
 fi
 PACKAGE_LIST_BOARD="rfkill bluetooth bluez bluez-tools"
 
@@ -132,6 +139,15 @@ function post_family_tweaks_bsp__dshanpi-a1-cm5_aic8800() {
 	sed -i 's#/dev/ttyS1#/dev/ttyS7#g' "${destination}"/usr/bin/aic-bluetooth
 	install -m 644 "$SRC/packages/bsp/aic8800/aic-bluetooth.service" \
 		"${destination}"/etc/systemd/system/aic-bluetooth.service
+}
+
+# Install the board-owned overlay catalogue consumed by the generic
+# dspi-config package. Device-tree binaries remain owned by the DTB package.
+function post_family_tweaks_bsp__dshanpi-a1-cm5_dspi_overlay_catalogue() {
+	install -D -m 0644 "$SRC/packages/bsp/dshanpi-a1-cm5/overlays.tsv" \
+		"${destination}/usr/share/dspi-config/boards/dshanpi-a1-cm5/overlays.tsv"
+	install -D -m 0644 "$SRC/packages/bsp/dshanpi-a1-cm5/system.conf" \
+		"${destination}/usr/share/dspi-config/boards/dshanpi-a1-cm5/system.conf"
 }
 
 function post_family_tweaks__dshanpi-a1-cm5_enable_aic8800_bluetooth() {
