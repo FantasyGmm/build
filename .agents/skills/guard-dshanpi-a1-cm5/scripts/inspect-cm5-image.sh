@@ -84,8 +84,20 @@ if [[ "$require_repository" == yes ]]; then
 	package_installed dshanpi-a1-cm5-repository || { echo "Repository client is not installed" >&2; exit 1; }
 	source_file="$mount_dir/etc/apt/sources.list.d/dshanpi.sources"
 	[[ -f "$source_file" ]] || { echo "DShanPI repository source is missing" >&2; exit 1; }
-	grep -Eq '^URIs: https://.+/dshanpi-a1-cm5/stable$' "$source_file" || {
-		echo "Repository source is not an HTTPS A1 CM5 stable URL" >&2
+	grep -Eq '^URIs: https://.+/apt/?$' "$source_file" || {
+		echo "Repository source is not the HTTPS DShanPI APT root" >&2
+		exit 1
+	}
+	grep -Fxq 'Suites: noble' "$source_file" || {
+		echo "Repository source does not select the stable noble suite" >&2
+		exit 1
+	}
+	grep -Fxq 'Components: common dshanpi-a1-cm5' "$source_file" || {
+		echo "Repository source does not select common and A1 CM5 components" >&2
+		exit 1
+	}
+	grep -Fxq 'Signed-By: /usr/share/keyrings/dshanpi-archive-keyring.gpg' "$source_file" || {
+		echo "Repository source does not use the DShanPI archive keyring" >&2
 		exit 1
 	}
 fi
