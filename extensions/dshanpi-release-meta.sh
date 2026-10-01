@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 # Install the exact product release meta-package supplied by dshanpi-build.
-# This marks the initial image cohort so dspi-config can later upgrade or
-# downgrade the complete tested DShanPI platform stack.
-function post_repo_customize_image__install_dshanpi_release_meta() {
+# This runs after the final apt update and after the repository client hook,
+# so a not-yet-published release can still be assembled without circular APT
+# access. It marks the initial image cohort so dspi-config can later upgrade
+# or downgrade the complete tested DShanPI platform stack.
+function post_post_debootstrap_tweaks__200_install_dshanpi_release_meta() {
 	local package_file package package_name
 	package_file=$(realpath "${DSHANPI_RELEASE_META_DEB:?DSHANPI_RELEASE_META_DEB is required}")
 	[[ -f "$package_file" ]] || exit_with_error "DShanPI release meta-package is missing" "$package_file"
