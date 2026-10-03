@@ -7,16 +7,21 @@
 # ArmBianOS never creates or signs APT repository metadata.
 function post_post_debootstrap_tweaks__100_install_dshanpi_repository() {
 	local package_dir="${DSHANPI_REPO_CLIENT_PACKAGES_DIR:?DSHANPI_REPO_CLIENT_PACKAGES_DIR is required}"
+	local product="${DSHANPI_PRODUCT:-${BOARD:-}}"
 	local keyring repository
 	local -a keyrings repositories
+	[[ "$product" =~ ^[a-z0-9][a-z0-9-]*$ ]] ||
+		exit_with_error "Invalid DShanPI product name" "$product"
 	[[ -d "$package_dir" ]] ||
 		exit_with_error "DShanPI repository client package directory is missing" "$package_dir"
 	mapfile -t keyrings < <(find "$package_dir" -maxdepth 1 -type f -name 'dshanpi-archive-keyring_*_all.deb' -print 2> /dev/null)
-	mapfile -t repositories < <(find "$package_dir" -maxdepth 1 -type f -name 'dshanpi-a1-cm5-repository_*_all.deb' -print 2> /dev/null)
+	mapfile -t repositories < <(find "$package_dir" -maxdepth 1 -type f -name "${product}-repository_*_all.deb" -print 2> /dev/null)
 	[[ ${#keyrings[@]} -eq 1 && ${#repositories[@]} -eq 1 ]] ||
-		exit_with_error "Expected exactly one keyring and one A1 CM5 repository package" "$package_dir"
+		exit_with_error "Expected exactly one keyring and one $product repository package" "$package_dir"
 	keyring=${keyrings[0]}
 	repository=${repositories[0]}
+	[[ $(dpkg-deb -f "$repository" Package) == "${product}-repository" ]] ||
+		exit_with_error "Unexpected DShanPI repository client package" "$repository"
 
 	display_alert "Installing DShanPI official update source" "$package_dir" "info"
 	cp "$keyring" "$repository" "$SDCARD/tmp/"

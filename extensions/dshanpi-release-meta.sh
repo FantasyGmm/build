@@ -7,11 +7,14 @@
 # or downgrade the complete tested DShanPI platform stack.
 function post_post_debootstrap_tweaks__200_install_dshanpi_release_meta() {
 	local package_file package package_name
+	local product="${DSHANPI_PRODUCT:-${BOARD:-}}"
+	[[ "$product" =~ ^[a-z0-9][a-z0-9-]*$ ]] ||
+		exit_with_error "Invalid DShanPI product name" "$product"
 	package_file=$(realpath "${DSHANPI_RELEASE_META_DEB:?DSHANPI_RELEASE_META_DEB is required}")
 	[[ -f "$package_file" ]] || exit_with_error "DShanPI release meta-package is missing" "$package_file"
 	package=$(dpkg-deb -f "$package_file" Package)
 	case "$package" in
-		dshanpi-a1-cm5-release-core | dshanpi-a1-cm5-release-desktop) ;;
+		"${product}-release-core" | "${product}-release-desktop") ;;
 		*) exit_with_error "Unexpected DShanPI release meta-package" "$package" ;;
 	esac
 	[[ $(dpkg-deb -f "$package_file" Architecture) == all ]] ||

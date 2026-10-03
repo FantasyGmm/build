@@ -138,11 +138,16 @@ function dump_extension_method_sources_body() {
 # to avoid hard coding the list of hook-points (eg: user_config, image_tweaks_pre_customize, etc) we use
 # a marker in the function names, namely "__" (two underscores) to determine the hook point.
 function initialize_extension_manager() {
-	# before starting, auto-add extensions specified (eg, on the command-line) via the ENABLE_EXTENSIONS or EXT env var. Do it only once.
-	[[ ${initialize_extension_manager_counter} -lt 1 ]] && [[ "${ENABLE_EXTENSIONS:-"${EXT}"}" != "" ]] && {
+	# Before starting, auto-add extensions specified by the board and by the
+	# caller. ENABLE_EXTENSIONS is normally set in the board file, while EXT is
+	# the command-line extension point. Merge both so an external product
+	# orchestrator can add release integration without replacing board-owned
+	# camera, multimedia or firmware extensions.
+	local configured_extensions="${ENABLE_EXTENSIONS:-}"
+	[[ -z "${EXT:-}" ]] || configured_extensions+="${configured_extensions:+,}${EXT}"
+	[[ ${initialize_extension_manager_counter} -lt 1 ]] && [[ -n "${configured_extensions}" ]] && {
 		local auto_extension
-		local _enable_csv="${ENABLE_EXTENSIONS:-"${EXT}"}"
-		for auto_extension in ${_enable_csv//,/ }; do
+		for auto_extension in ${configured_extensions//,/ }; do
 			ENABLE_EXTENSION_TRACE_HINT="ENABLE_EXTENSIONS/EXT -> " enable_extension "${auto_extension}"
 		done
 	}
