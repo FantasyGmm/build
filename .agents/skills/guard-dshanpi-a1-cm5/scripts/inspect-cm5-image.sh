@@ -84,7 +84,7 @@ if [[ "$require_repository" == yes ]]; then
 	package_installed dshanpi-a1-cm5-repository || { echo "Repository client is not installed" >&2; exit 1; }
 	source_file="$mount_dir/etc/apt/sources.list.d/dshanpi.sources"
 	[[ -f "$source_file" ]] || { echo "DShanPI repository source is missing" >&2; exit 1; }
-	grep -Eq '^URIs: https://.+/apt/?$' "$source_file" || {
+	grep -Fxq 'URIs: https://apt.100ask.net' "$source_file" || {
 		echo "Repository source is not the HTTPS DShanPI APT root" >&2
 		exit 1
 	}
