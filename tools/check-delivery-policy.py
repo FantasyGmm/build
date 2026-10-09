@@ -33,8 +33,8 @@ def check(root):
     require(hashlib.sha256(policy).hexdigest() == manifest.get("sha256"), "delivery policy SHA-256 mismatch")
     text = policy.decode()
     require(POLICY_ID in text, "policy document lost its identity")
-    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 12)},
-            "delivery policy must retain all eleven gates")
+    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 13)},
+            "delivery policy must retain all twelve gates, including G12 kernel headers")
     for value in ("https://apt.100ask.net", "dshanpi/ArmBianOS", "dshanpi-a1", "dshanpi-a1-cm5", "dshanpi-r1", "avaota-a1"):
         require(value in text, "delivery policy lost required endpoint/product: " + value)
     references = manifest.get("references", [])

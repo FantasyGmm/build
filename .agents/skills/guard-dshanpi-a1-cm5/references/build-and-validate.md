@@ -58,6 +58,19 @@ sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
 
 ### 5. APT 发布边界
 
+按 DELIVERY_POLICY.md 的 G12，每个镜像都要关联并发布可后装的内核 headers DEB。
+从实际镜像内核及包版本确定 headers，核对 kernel release、生成头文件、Module.symvers
+和 build 链接；验证匹配架构环境中的外部模块编译及 vermagic。发布记录包含镜像与
+headers 的哈希、版本、下载大小、Installed-Size、APT 安装命令和公开下载链接。
+同一内核的 CLI/桌面变体可共用一个包；历史 headers 随旧镜像保留。是否预装另由镜像方案决定。
+
+大小参考（2026-10-09 原版 A1 实测，不代表其他内核版本）：
+`linux-headers-vendor-rk35xx=25.11.0-trunk.20261008.4` 对应
+`6.1.115-vendor-rk35xx`，DEB 为 14,008,176 字节（14.01 MB / 13.36 MiB），
+`Installed-Size` 为 74,410 KiB（72.7 MiB）；实板头文件目录 `du -sk` 为
+137,076 KiB（133.9 MiB，含文件系统分配开销及安装后生成内容）。gcc/make 等依赖另计。
+包压缩大小、声明安装大小和实际磁盘占用应分别说明，不混用。
+
 本仓库不生成 Packages/Release/InRelease，不保存签名私钥，也不执行 testing/stable 发布。`dshanpi-build` 收集这里产生的 deb、构建精确版本元包、签名 APT 元数据并上传下载站。stable 晋级必须复用 testing 已验证包的 SHA-256，不能重新编译；U-Boot 和 `linux-libc-dev` 不进入在线升级集合。
 
 2026-09-30 的 overlay 软件门禁记录：内核构建 UUID

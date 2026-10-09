@@ -100,6 +100,27 @@ APT 发布状态、完整系统的 Release URL、公开下载检查、升级/回
 检查政策文件的一致性只证明门禁要求已接入，不证明自动 Release 流水线或硬件已实现/验证。
 缺失环节必须在当前任务报告中明确记录并由后续实现补齐，不得悄悄改回人工上传的常规流程。
 
+## G12 每个镜像对应的内核头文件 DEB
+
+每个对外发布的镜像（全部板型、CLI/桌面及后续内核版本）必须同时提供可独立安装的
+`linux-headers-*` DEB，并由 dshanpi-build 发布到 `https://apt.100ask.net` 的签名源。
+是否预装由镜像方案决定；即使镜像未预装，用户也必须能在之后通过 APT 安装精确匹配包。
+同一板型、同一内核包版本和 ABI 的多个镜像变体可共用同一 headers DEB，无需重复构建。
+
+headers 必须来自镜像内核的同一源码、配置和构建版本；校验包名/架构/Debian 版本、
+kernel release（运行中对应 `uname -r`）、生成头文件和 `Module.symvers`，以及安装后的
+`/lib/modules/<kernel-release>/build` 链接。不能只凭主版本号相同，不能用其他板型、其他
+配置的 headers 或 `linux-libc-dev` 代替。CM5 必须保留独立包命名空间。
+
+发行记录必须关联每个镜像 SHA-256、内核包及版本、kernel release、headers 包名/版本/
+架构/SHA-256、DEB 下载大小及 Installed-Size。GitHub Release 说明或伴随清单必须给出
+对应 headers 的公开下载链接和精确 APT 安装命令，避免用户误装最新但不匹配的版本。
+发布门禁必须拒绝缺包、ABI/版本不匹配、签名/哈希不符或公开 APT 不可安装的镜像交付。
+
+针对每个新的内核包/headers 组合，在匹配架构环境验证干净安装及外部内核模块编译，
+核对生成模块的 vermagic；实板加载结果与编译测试分别记录。保留旧镜像对应的 headers、
+依赖和下载记录，支持后装、DKMS 重建和回滚，不得只保留最新版本。
+
 ## 维护与检查
 
 三仓分别执行 `python3 tools/check-delivery-policy.py`；拥有多个 checkout 时执行

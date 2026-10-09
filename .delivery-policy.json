@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_id": "dshanpi-delivery-v1",
   "role": "armbianos",
-  "sha256": "8b60c3a26a148ef225a8296a62cf4100308ca4dfed593c4f3a8cbe3d9a32aafc",
+  "sha256": "003320d4adcf6d82038e9d786633f15de5611909df7b093de355d16df777fe89",
   "references": [
     "AGENTS.md",
     "README.md",
