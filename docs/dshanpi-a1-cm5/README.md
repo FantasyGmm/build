@@ -1,3 +1,5 @@
+> DShanPI 产品交付必须遵守 [三仓统一交付门禁](../../DELIVERY_POLICY.md)。本页的上游/历史说明不替代该门禁。
+
 # DShanPI A1 CM5 adaptation / DShanPI A1 CM5 适配说明
 
 本目录说明 A1 CM5 的设备树结构、配置、编译、镜像验证与受控更新流程。面向自动化代理的可执行维护规范位于 [仓库 skill](../../.agents/skills/guard-dshanpi-a1-cm5/SKILL.md)。
@@ -112,7 +114,7 @@ sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
 - 日志：`output/logs/log-build-ac3a9d65-53fd-4fde-95a5-eecb5cffc41b.log`
 - 镜像：`Armbian-unofficial_25.11.0-trunk.20260929.1_Dshanpi-a1-cm5_noble_vendor_6.1.115_gnome_desktop.img`
 - 已通过：完整镜像构建、镜像 SHA-256、只读挂载检查、3 个 AIC8800 模块、3 路 OV13850 和相机 IQ。旧的仓库实验验证记录不再作为当前发布架构依据。
-- 尚未通过：物理板完整测试矩阵；这仍是发布到生产 stable 或新 GitHub Release 前的硬门槛。
+- 尚未通过：物理板完整测试矩阵；这仍是晋级生产 stable 的硬门槛；自动 prerelease 必须明确记录未完成的硬件验证。
 
 ## English
 

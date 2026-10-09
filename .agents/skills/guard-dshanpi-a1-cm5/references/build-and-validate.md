@@ -1,5 +1,9 @@
 # Build and validation / 编译与验证
 
+所有流程必须同时遵守 [三仓统一交付门禁](../../../../DELIVERY_POLICY.md)。正式镜像由
+dshanpi-build 使用与 APT 相同的精确包集组装，并自动上传 dshanpi/ArmBianOS Releases；
+公开索引与下载文件验证完成前不能标记完整交付。包维护发行可以只更新 DEB 与版本元包。
+
 ## 中文流程
 
 ### 1. 源码门禁
@@ -79,4 +83,4 @@ Run the source gate before and after edits. Build the Noble/vendor image with `B
 
 Verify the image checksum and run `inspect-cm5-image.sh` read-only. Package-set validation, APT signing, testing publication, and stable promotion live in `dshanpi-build`, not ArmBianOS. Software validation does not substitute for boot, I/O, camera, radio, upgrade, reboot, and rollback testing on the board.
 
-Do not create a GitHub Release until the user approves the exact publication parameters. For an approved release, keep the raw image, compress with `--keep`, verify the checksum, and run the release-mode gate.
+Follow the authorized, version-controlled publication plan. An authorized automated pipeline does not need repeated per-asset confirmation; ad hoc publication outside existing authorization still needs approval. Keep the raw image, compress with `--keep`, verify checksums, and verify public assets after upload. The existing release-mode shell gate is the manual CM5 adapter; automated delivery must validate the pinned remote commit and the complete shared policy. Missing automation must be reported explicitly.

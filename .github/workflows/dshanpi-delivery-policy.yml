@@ -1,0 +1,21 @@
+name: DShanPI delivery policy
+on:
+  pull_request:
+  push:
+    branches: [main, feature/dshanpi-a1-cm5]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  delivery-policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install source gate dependencies
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+      - name: Check shared delivery policy and protected board baseline
+        run: |
+          python3 tools/check-delivery-policy.py
+          bash .agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh source "$PWD"

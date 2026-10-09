@@ -25,6 +25,12 @@ repo=$(realpath "$repo")
 [[ -d "$repo/.git" ]] || { echo "Not a Git checkout: $repo" >&2; exit 2; }
 cd "$repo"
 
+if python3 "$repo/tools/check-delivery-policy.py"; then
+	pass "shared delivery policy is wired"
+else
+	fail "shared delivery policy gate failed"
+fi
+
 if git cat-file -e "${baseline}^{commit}" 2>/dev/null; then
 	pass "baseline commit exists: $baseline"
 else
@@ -133,7 +139,7 @@ if git status --porcelain | rg -q 'lib/tools/common/__pycache__/'; then
 fi
 
 if [[ "$mode" == release ]]; then
-	[[ "${DSHANPI_RELEASE_APPROVED:-no}" == yes ]] || fail "release approval flag is absent; require explicit user approval"
+	[[ "${DSHANPI_RELEASE_APPROVED:-no}" == yes ]] || fail "release authorization flag is absent; require an authorized fixed release plan"
 	branch=$(git branch --show-current)
 	[[ "$branch" != main && "$branch" != master && -n "$branch" ]] && pass "release branch is not main/master: $branch" || fail "refusing release from main/master or detached HEAD"
 	if [[ -z "$(git status --porcelain --untracked-files=no)" ]]; then pass "tracked worktree is clean"; else fail "tracked worktree is not clean"; fi
