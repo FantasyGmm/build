@@ -7,6 +7,8 @@
 固定源码和精确 DEB、签名发布 apt.100ask.net，并编排镜像自动上传 GitHub Releases。
 镜像必须预装 dspi-config、本板 profile、签名源/公钥和发行元包，与 APT 包集一致。
 后续硬件支持和软件更新必须可通过 DEB/APT 交付；手工复制驱动或 DTBO 不构成正式修复。
+每个镜像必须按 G12 同步交付与内核精确匹配、用户可通过 APT 后装的 `linux-headers-*`
+DEB；记录对应关系、大小、哈希和安装命令，验证外部模块编译并保留历史包。
 
 涉及 A1/CM5 时必须读取 `.agents/skills/guard-dshanpi-a1-cm5/SKILL.md`，运行其 source 门禁。
 保留原 A1 基线 `9a3ce1500ea7d149dabd64247afea21cde920ed9` 及四个受保护路径；
