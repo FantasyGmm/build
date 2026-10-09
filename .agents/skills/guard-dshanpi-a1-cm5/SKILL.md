@@ -9,6 +9,7 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
 
 ## Start every task
 
+0. Read the repository's [mandatory delivery policy](../../../DELIVERY_POLICY.md) and root AGENTS.md. It covers all four products, automated GitHub image delivery, signed APT updates, overlays, exact cohorts, and evidence; CM5 isolation below remains mandatory.
 1. Work from the repository root and inspect the current branch, upstream, and `git status`.
 2. Run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh source <repo>` before editing. Stop and report the invariant if it fails; do not reconstruct a protected A1 file by assumption.
 3. Read the reference that matches the task:
@@ -47,8 +48,9 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
 - Before committing or pushing, show the files and explain semantic A1-versus-CM5 impact. Push a feature branch, then confirm the remote ref equals the intended commit.
 - Package assembly, APT signing, and testing/stable publication belong to the external `dshanpi-build` repository. ArmBianOS only consumes exact prebuilt client/meta packages while creating an image.
 - Publish packages to `testing` only after the complete-set and signature checks pass. Promote the exact tested package cohort; never rebuild packages for stable.
-- Do not create or alter a GitHub Release without explicit approval for the exact tag, target commit, title, prerelease state, and asset list.
-- For an approved Release, retain the `.img`, create a `.img.gz` with `--keep`, verify its checksum, set `DSHANPI_RELEASE_APPROVED=yes`, and run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh release <repo> <image.img.gz>` before upload.
+- Full image deliveries must be orchestrated by dshanpi-build and automatically published to dshanpi/ArmBianOS Releases under the shared policy. A version-controlled plan must fix the tag, target commit, title, prerelease state, variants and assets. Existing authorization for that pipeline and plan covers uploads within scope; do not require repeated per-asset approval. Obtain authorization for ad hoc publication only when not already covered.
+- Retain `.img`, compress with `--keep`, and verify checksums and image contents. The existing `release` shell mode is the manual CM5 adapter: set `DSHANPI_RELEASE_APPROVED=yes` only for an authorized fixed plan, then run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh release <repo> <image.img.gz>`. Its feature-branch/upstream checks describe manual work; an automated publisher must instead prove the exact pinned remote commit and all shared delivery gates, including post-upload public verification.
+- Never treat the approval flag, a source gate, or a temporary Actions artifact as proof of completed delivery. Report missing automated Release integration explicitly until implemented and tested.
 
 ## Hand off
 

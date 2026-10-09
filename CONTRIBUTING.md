@@ -1,3 +1,5 @@
+> DShanPI 产品交付必须遵守 [三仓统一交付门禁](DELIVERY_POLICY.md)。本页的上游/历史说明不替代该门禁。
+
 # Contributing to Armbian Linux build framework
 
 We would love to have you join the Armbian community! Below summarizes the processes that we follow.
