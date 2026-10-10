@@ -33,8 +33,8 @@ def check(root):
     require(hashlib.sha256(policy).hexdigest() == manifest.get("sha256"), "delivery policy SHA-256 mismatch")
     text = policy.decode()
     require(POLICY_ID in text, "policy document lost its identity")
-    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 13)},
-            "delivery policy must retain all twelve gates, including G12 kernel headers")
+    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 14)},
+            "delivery policy must retain all thirteen gates, including G12 kernel headers and G13 ownership/handoff")
     for value in ("https://apt.100ask.net", "dshanpi/ArmBianOS", "dshanpi-a1", "dshanpi-a1-cm5", "dshanpi-r1", "avaota-a1"):
         require(value in text, "delivery policy lost required endpoint/product: " + value)
     references = manifest.get("references", [])
@@ -46,6 +46,13 @@ def check(root):
     require(any(not name.startswith(".github/") for name in hooks), "missing local policy gate")
     for name in hooks:
         require("check-delivery-policy.py" in repository_file(root, name).read_text(), "policy gate not wired in " + name)
+    repository_file(root, "tools/check-repository-hygiene.py")
+    hygiene_hooks = manifest.get("hygiene_hooks", [])
+    require(bool(hygiene_hooks), "missing repository hygiene CI hook")
+    for name in hygiene_hooks:
+        require(name.startswith(".github/workflows/"), "hygiene hook must include CI")
+        require("check-repository-hygiene.py" in repository_file(root, name).read_text(),
+                "repository hygiene gate not wired in " + name)
     return manifest, policy
 
 
@@ -61,6 +68,9 @@ def main():
         require(peer_policy == policy, "cross-repository policy drift: " + str(peer))
         require(repository_file(peer, "tools/check-delivery-policy.py").read_bytes() == checker,
                 "cross-repository policy checker drift: " + str(peer))
+        require(repository_file(peer, "tools/check-repository-hygiene.py").read_bytes() ==
+                repository_file(args.root, "tools/check-repository-hygiene.py").read_bytes(),
+                "cross-repository hygiene checker drift: " + str(peer))
     print(f"Delivery policy wiring passed: {manifest['role']} ({POLICY_ID}); not a release/hardware verdict")
 
 

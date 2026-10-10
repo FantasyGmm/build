@@ -56,3 +56,9 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
 ## Hand off
 
 Report the branch, commits, remote ref, build UUID/log, image path and checksum, validation results, untracked files, and hardware tests still outstanding. Stop all mutation when the user says they are taking over.
+
+## Portable maintenance and ownership
+
+This repository copy is the maintained skill; no global ~/.codex skill is required. Use the checkout root, not a previous developer's home path. Read [the historical handoff](references/historical-handoff.md) only for the early CM5 build/release evidence; current state is in [the development handoff](../../../docs/development-handoff.md).
+
+Follow DELIVERY_POLICY.md G13: board/kernel/DT changes stay here, optional DEB recipes and release evidence live in dshanpi-build, and client behavior lives in dspi-config. Stage implementation separately from evidence, then run `python3 tools/check-repository-hygiene.py`. Merge through reviewed PRs into main when authorized; keep historical commits reachable for existing locks.

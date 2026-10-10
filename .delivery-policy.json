@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_id": "dshanpi-delivery-v1",
   "role": "armbianos",
-  "sha256": "003320d4adcf6d82038e9d786633f15de5611909df7b093de355d16df777fe89",
+  "sha256": "00d4643efe42847526632406fdc4b54828a4461b95a9531092cff4b7d5537429",
   "references": [
     "AGENTS.md",
     "README.md",
@@ -12,10 +12,14 @@
     ".github/Releases-wip.md",
     "docs/dshanpi-a1-cm5/README.md",
     ".agents/skills/guard-dshanpi-a1-cm5/SKILL.md",
-    ".agents/skills/guard-dshanpi-a1-cm5/references/build-and-validate.md"
+    ".agents/skills/guard-dshanpi-a1-cm5/references/build-and-validate.md",
+    "docs/development-handoff.md"
   ],
   "hooks": [
     ".github/workflows/dshanpi-delivery-policy.yml",
     ".agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh"
+  ],
+  "hygiene_hooks": [
+    ".github/workflows/dshanpi-delivery-policy.yml"
   ]
 }
