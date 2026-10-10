@@ -609,6 +609,10 @@ function kernel_package_callback_linux_headers() {
 	# Note: 'pahole | dwarves' alternative — older releases (buster/bullseye/focal) ship pahole inside the
 	# 'dwarves' package; standalone 'pahole' exists from bookworm/jammy onward. When support for these
 	# releases is dropped, simplify to 'pahole'.
+	# olddefconfig probes pahole on the target. Without it, Kconfig silently
+	# disables BTF_MODULES, changing struct module even though vermagic matches.
+	local headers_btf_expected=""
+	headers_btf_expected=$(grep -E '^CONFIG_DEBUG_INFO_BTF(_MODULES)?=y$' "${kernel_work_dir}/.config" || true)
 	cat <<- CONTROL_FILE > "${package_DEBIAN_dir}/control"
 		Version: ${artifact_version}
 		Maintainer: ${MAINTAINER} <${MAINTAINERMAIL}>
@@ -651,6 +655,10 @@ function kernel_package_callback_linux_headers() {
 			NCPU=\$(grep -c 'processor' /proc/cpuinfo)
 			echo "Configuring kernel-headers (${kernel_version_family}) - please wait ..."
 			make ARCH="${SRC_ARCH}" olddefconfig
+			if [[ "\$(grep -E '^CONFIG_DEBUG_INFO_BTF(_MODULES)?=y$' .config || true)" != '${headers_btf_expected}' ]]; then
+				echo "ERROR: headers configuration changed the kernel's BTF/module ABI. Check the pahole dependency." >&2
+				exit 1
+			fi
 
 			echo "Compiling kernel-headers scripts (${kernel_version_family}) using \$NCPU CPUs - please wait ..."
 			make ARCH="${SRC_ARCH}" -j\$NCPU scripts

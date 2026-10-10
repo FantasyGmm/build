@@ -1,3 +1,5 @@
+> DShanPI 产品交付必须遵守 [三仓统一交付门禁](../DELIVERY_POLICY.md)。本页的上游/历史说明不替代该门禁。
+
 <p align='center'>
   <a href='https://www.armbian.com'>
     <img src='https://raw.githubusercontent.com/armbian/.github/master/profile/tux-two.png' width='400' height='226' alt='Armbian Linux'></a>

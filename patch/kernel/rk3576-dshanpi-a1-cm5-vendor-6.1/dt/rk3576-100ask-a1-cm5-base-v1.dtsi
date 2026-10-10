@@ -1,0 +1,132 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/* Hardware overrides for SCH_A1-CM5-Base_Schematic1_2026-09-18. */
+
+/*
+ * The panel include describes the older A1 I2C4/GPIO4_C6 touch wiring.
+ * Keep ES8388 on I2C4 but disable that stale touch instance.  The CM5 base
+ * routes CTP_SCL/SDA to I2C9_M1, CTP_INT to GPIO3_D0 and CTP_RST to GPIO0_C1.
+ */
+&i2c4 {
+	pinctrl-0 = <&i2c4m0_xfer>;
+
+	gt911@5d {
+		status = "disabled";
+	};
+};
+
+&i2c9 {
+	clock-frequency = <100000>;
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c9m1_xfer>;
+
+	gt911_cm5: touchscreen@5d {
+		compatible = "goodix,gt911";
+		reg = <0x5d>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <RK_PD0 IRQ_TYPE_EDGE_FALLING>;
+		irq-gpios = <&gpio3 RK_PD0 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&tp_irq_cm5 &tp_rst_cm5>;
+		status = "okay";
+	};
+};
+
+/*
+ * GPIO2_B0 is the CM5 Wi-Fi SDIO D2 signal. The inherited A1 HDMI
+ * enable GPIO switches it to an output when HDMI starts, breaking SDIO.
+ * CM5 has no HDMI enable switch on this pin.
+ */
+&hdmi {
+	/delete-property/ enable-gpios;
+};
+
+/* Both A1 schematics route the two SBU DC-control nets to GPIO4_C4/C5. */
+&usbdp_phy {
+	sbu1-dc-gpios = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
+	sbu2-dc-gpios = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
+};
+
+/*
+ * The CM5 base uses LOUT1/ROUT1 for the headset, LOUT2/ROUT2 for two class-D
+ * speaker amplifiers, MIC1P/N for the headset microphone and MIC2P/N for the
+ * on-board microphone.  GPIO4_B5 is reused as the headset jack-detect input.
+ */
+&es8388_sound {
+	/* The CM5 headset detect input is high while the plug is inserted. */
+	hp-det-gpio = <&gpio4 RK_PB5 GPIO_ACTIVE_HIGH>;
+	rockchip,audio-routing =
+		"Headphone", "LOUT1",
+		"Headphone", "ROUT1",
+		"Speaker", "LOUT2",
+		"Speaker", "ROUT2",
+		"Headphone", "Headphone Power",
+		"Headphone", "Headphone Power",
+		"Speaker", "Speaker Power",
+		"Speaker", "Speaker Power",
+		"LINPUT1", "Headset Mic",
+		"RINPUT1", "Headset Mic",
+		"LINPUT2", "Main Mic",
+		"RINPUT2", "Main Mic";
+	/*
+	 * Q29/Q30 put both headphone channels in series with NMOS switches.
+	 * Their common gate is fed from GPIO4_B4 through 300 kOhm.  Keep this
+	 * output pulled high so the analogue switches do not float off.
+	 */
+	pinctrl-0 = <&hp_det_cm5 &hp_mosfet_gate_cm5>;
+};
+
+/*
+ * GPIO1_D0 is SAI2_SDO_M0 on the CM5 connector and carries PCM data from
+ * RK3576 to ES8388.  The common A1 DTS incorrectly also assigns this pin to
+ * an unused always-on "vcc_pcie_pwr" fixed regulator, which keeps the audio
+ * data line high.  The CM5 base feeds VCC3V3_PCIE0/1 directly and has no
+ * GPIO1_D0-controlled PCIe load switch, so release the pin for SAI2.
+ */
+&vcc_pcie_pwr {
+	status = "disabled";
+};
+
+/*
+ * Default to the hub on USB2_OTG1_DP/DM (board nets USB2_HOST1_DP/DM).
+ * Keep COMBPHY1 in USB mode, with DWC3 limited to high speed.
+ * The optional CM5 PCIe1 overlay disables this entire USB1 path before
+ * enabling PCIe1. Do not enable both paths on this board.
+ */
+&pcie1 {
+	status = "disabled";
+};
+
+&usb_drd1_dwc3 {
+	dr_mode = "host";
+	phys = <&u2phy1_otg>, <&combphy1_psu PHY_TYPE_USB3>;
+	phy-names = "usb2-phy", "usb3-phy";
+	maximum-speed = "high-speed";
+	snps,dis_u2_susphy_quirk;
+	snps,usb2-lpm-disable;
+	status = "okay";
+};
+
+&pinctrl {
+	touchscreen-cm5 {
+		tp_irq_cm5: tp-irq-cm5 {
+			rockchip,pins = <3 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		tp_rst_cm5: tp-rst-cm5 {
+			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	headphone-cm5 {
+		hp_det_cm5: hp-det-cm5 {
+			rockchip,pins = <4 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+
+		hp_mosfet_gate_cm5: hp-mosfet-gate-cm5 {
+			rockchip,pins = <4 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+};

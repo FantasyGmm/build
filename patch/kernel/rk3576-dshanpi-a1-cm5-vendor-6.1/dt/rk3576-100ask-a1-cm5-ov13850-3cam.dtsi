@@ -1,0 +1,316 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/* Three 2-lane OV13850 modules on A1-CM5 FPC4, FPC6 and FPC7. */
+
+&csi2_dcphy0 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi_in_ov13850_0: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ov13850_0_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			csidcphy0_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&mipi0_csi2_input>;
+			};
+		};
+	};
+};
+
+&csi2_dphy1 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi_in_ov13850_1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ov13850_1_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			csidphy1_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&mipi1_csi2_input>;
+			};
+		};
+	};
+};
+
+&csi2_dphy4 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi_in_ov13850_2: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ov13850_2_out>;
+				data-lanes = <1 2>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			csidphy4_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&mipi3_csi2_input>;
+			};
+		};
+	};
+};
+
+&i2c2 {
+	status = "okay";
+	pinctrl-names = "default";
+	/* FPC4 and FPC6 share CAM_CLK0 on this carrier. */
+	pinctrl-0 = <&cam_i2c2m0_xfer &cam_clk0m0_clk0>;
+
+	ov13850_0: camera@10 {
+		compatible = "ovti,ov13850";
+		reg = <0x10>;
+		clocks = <&cru CLK_MIPI_CAMERAOUT_M0>;
+		clock-names = "xvclk";
+		power-domains = <&power RK3576_PD_VI>;
+		avdd-supply = <&vcc_3v3_s3>;
+		dovdd-supply = <&vcc_3v3_s3>;
+		dvdd-supply = <&vcc_3v3_s3>;
+		pwdn-gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "ZC-OV13850R2A-V1";
+		rockchip,camera-module-lens-name = "Largan-50064B31";
+		port {
+			ov13850_0_out: endpoint {
+				remote-endpoint = <&mipi_in_ov13850_0>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&i2c3 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&cam_i2c3m2_xfer>;
+	ov13850_1: camera@10 {
+		compatible = "ovti,ov13850";
+		reg = <0x10>;
+		clocks = <&cru CLK_MIPI_CAMERAOUT_M0>;
+		clock-names = "xvclk";
+		power-domains = <&power RK3576_PD_VI>;
+		avdd-supply = <&vcc_3v3_s3>;
+		dovdd-supply = <&vcc_3v3_s3>;
+		dvdd-supply = <&vcc_3v3_s3>;
+		pwdn-gpios = <&gpio3 RK_PC7 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "ZC-OV13850R2A-V1";
+		rockchip,camera-module-lens-name = "Largan-50064B31";
+		port {
+			ov13850_1_out: endpoint {
+				remote-endpoint = <&mipi_in_ov13850_1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&i2c5 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&cam_i2c5m3_xfer &cam_clk2m0_clk2>;
+	ov13850_2: camera@10 {
+		compatible = "ovti,ov13850";
+		reg = <0x10>;
+		clocks = <&cru CLK_MIPI_CAMERAOUT_M2>;
+		clock-names = "xvclk";
+		power-domains = <&power RK3576_PD_VI>;
+		avdd-supply = <&vcc_3v3_s3>;
+		dovdd-supply = <&vcc_3v3_s3>;
+		dvdd-supply = <&vcc_3v3_s3>;
+		pwdn-gpios = <&gpio3 RK_PC6 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <2>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "ZC-OV13850R2A-V1";
+		rockchip,camera-module-lens-name = "Largan-50064B31";
+		port {
+			ov13850_2_out: endpoint {
+				remote-endpoint = <&mipi_in_ov13850_2>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+};
+
+&mipi0_csi2 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi0_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csidcphy0_out>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi0_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in0>;
+			};
+		};
+	};
+};
+
+&mipi1_csi2 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi1_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csidphy1_out>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi1_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in1>;
+			};
+		};
+	};
+};
+
+&mipi3_csi2 {
+	status = "okay";
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi3_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csidphy4_out>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mipi3_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in3>;
+			};
+		};
+	};
+};
+
+&rkcif { status = "okay"; };
+&rkcif_mmu { status = "okay"; };
+&rkisp { status = "okay"; };
+&rkisp_mmu { status = "okay"; };
+
+/*
+ * The carrier routes the three camera SCCB/I2C buses directly to the FPC
+ * connectors without external pull-ups.  Keep Schmitt input enabled and use
+ * the SoC pull-ups so an unpopulated/module-side bus does not float low.
+ * Board revisions should still fit external pull-ups for robust operation.
+ */
+&pinctrl {
+	camera-i2c {
+		cam_i2c2m0_xfer: cam-i2c2m0-xfer {
+			rockchip,pins =
+				<0 RK_PB7 9 &pcfg_pull_up_smt>,
+				<0 RK_PC0 9 &pcfg_pull_up_smt>;
+		};
+
+		cam_i2c3m2_xfer: cam-i2c3m2-xfer {
+			rockchip,pins =
+				<3 RK_PD4 11 &pcfg_pull_up_smt>,
+				<3 RK_PD5 11 &pcfg_pull_up_smt>;
+		};
+
+		cam_i2c5m3_xfer: cam-i2c5m3-xfer {
+			rockchip,pins =
+				<3 RK_PC4 11 &pcfg_pull_up_smt>,
+				<3 RK_PC1 11 &pcfg_pull_up_smt>;
+		};
+	};
+};
+
+&rkcif_mipi_lvds {
+	status = "okay";
+	port { cif_mipi_in0: endpoint { remote-endpoint = <&mipi0_csi2_output>; }; };
+};
+&rkcif_mipi_lvds_sditf {
+	status = "okay";
+	port { mipi0_sditf_out: endpoint { remote-endpoint = <&isp_vir0_in>; }; };
+};
+&rkisp_vir0 {
+	status = "okay";
+	port { isp_vir0_in: endpoint { remote-endpoint = <&mipi0_sditf_out>; }; };
+};
+
+&rkcif_mipi_lvds1 {
+	status = "okay";
+	port { cif_mipi_in1: endpoint { remote-endpoint = <&mipi1_csi2_output>; }; };
+};
+&rkcif_mipi_lvds1_sditf {
+	status = "okay";
+	port { mipi1_sditf_out: endpoint { remote-endpoint = <&isp_vir1_in>; }; };
+};
+&rkisp_vir1 {
+	status = "okay";
+	port { isp_vir1_in: endpoint { remote-endpoint = <&mipi1_sditf_out>; }; };
+};
+
+&rkcif_mipi_lvds3 {
+	status = "okay";
+	port { cif_mipi_in3: endpoint { remote-endpoint = <&mipi3_csi2_output>; }; };
+};
+&rkcif_mipi_lvds3_sditf {
+	status = "okay";
+	port { mipi3_sditf_out: endpoint { remote-endpoint = <&isp_vir3_in>; }; };
+};
+&rkisp_vir3 {
+	status = "okay";
+	port { isp_vir3_in: endpoint { remote-endpoint = <&mipi3_sditf_out>; }; };
+};

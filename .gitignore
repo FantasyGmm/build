@@ -38,3 +38,12 @@ Dockerfile
 
 # Runtime symlink created by extensions/seeed-rk.sh (points into cache/sources)
 extensions/seeed_armbian_extension
+
+# Local development state (vendor sources remain explicitly tracked)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.env
+.env.local
+*.local.json

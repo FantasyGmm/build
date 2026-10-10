@@ -1,0 +1,64 @@
+---
+name: guard-dshanpi-a1-cm5
+description: Safely audit, modify, configure, build, validate, commit, or publish DShanPI A1 CM5 support in this Armbian repository. Use for CM5 kernel or U-Boot device trees, board configuration, camera/AIC8800/multimedia integration, image builds, signed APT repository work, releases, or handoff; preserve the known-good original A1 baseline and CM5 package namespace.
+---
+
+# Guard DShanPI A1 CM5
+
+Maintain the CM5 variant without changing the original A1 implementation. Treat builds, pushes, package publication, and Releases as gated operations.
+
+## Start every task
+
+0. Read the repository's [mandatory delivery policy](../../../DELIVERY_POLICY.md) and root AGENTS.md. It covers all four products, automated GitHub image delivery, signed APT updates, overlays, exact cohorts, and evidence; CM5 isolation below remains mandatory.
+1. Work from the repository root and inspect the current branch, upstream, and `git status`.
+2. Run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh source <repo>` before editing. Stop and report the invariant if it fails; do not reconstruct a protected A1 file by assumption.
+3. Read the reference that matches the task:
+   - Device-tree or pin-routing work: [references/device-tree.md](references/device-tree.md)
+   - Build, image inspection, package publication, or release work: [references/build-and-validate.md](references/build-and-validate.md)
+   - File ownership, rationale, or change history: [references/change-map.md](references/change-map.md)
+4. Inspect schematics, DTS bindings, or hardware evidence before changing electrical routing. Do not "fix" the recorded non-fatal SDIO clock-provider warning without such evidence.
+
+## Preserve isolation
+
+- Keep baseline `9a3ce1500ea7d149dabd64247afea21cde920ed9` and the four protected original-A1 paths enforced by the gate unchanged unless the user explicitly expands scope after reviewing the proposed diff.
+- Put CM5 behavior under `dshanpi-a1-cm5`, DTB `rk3576-100ask-dshanpi-a1-cm5`, kernel namespace `rk3576-dshanpi-a1-cm5`, and its dedicated kernel/U-Boot patch layers.
+- Reuse the shared A1 U-Boot defconfig only through the CM5 board hook that edits the temporary `.config`; never edit the shared defconfig for CM5 selection.
+- Guard shared-framework fallbacks with `BOARD=dshanpi-a1-cm5`. Preserve original A1 behavior.
+- Keep `lib/tools/common/__pycache__/` and generated `output/`, `.tmp/`, or cache artifacts out of commits.
+
+## Modify and validate
+
+1. Change the narrowest CM5 layer. Preserve include order when an override intentionally replaces a property from an earlier DTSI.
+2. Run `bash -n` for changed shell/config files and `git diff --check`.
+3. Run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh source <repo>` again.
+4. Build with the recorded command in `references/build-and-validate.md`. Use a new monotonic `REVISION` for changed release packages.
+5. Inspect an image read-only with:
+
+   ```bash
+   sudo .agents/skills/guard-dshanpi-a1-cm5/scripts/inspect-cm5-image.sh \
+     /absolute/path/to/image.img
+   ```
+
+   Add `--require-repository` only for a release image built with client packages supplied by `dshanpi-build`. For a routing change, also inspect the compiled DTB with `dtc`/`fdtget`; the generic inspector cannot prove task-specific pin choices.
+6. Treat physical-board boot, display/touch, Ethernet, USB, audio, Wi-Fi/Bluetooth, all three cameras, thermal fan, upgrade, reboot, and rollback tests as distinct from software validation.
+
+## Commit, push, and publish
+
+- Separate board/device-tree changes from optional repository tooling and documentation when practical.
+- Before committing or pushing, show the files and explain semantic A1-versus-CM5 impact. Push a feature branch, then confirm the remote ref equals the intended commit.
+- Package assembly, APT signing, and testing/stable publication belong to the external `dshanpi-build` repository. ArmBianOS only consumes exact prebuilt client/meta packages while creating an image.
+- Publish packages to `testing` only after the complete-set and signature checks pass. Promote the exact tested package cohort; never rebuild packages for stable.
+- Enforce delivery policy G12 for every image: publish the exact matching kernel headers DEB through signed APT, record image/kernel/headers identity, hashes, sizes and later-install commands, validate external-module builds, and retain historical headers. Shared CLI/desktop kernel cohorts may reuse one headers package; CM5 keeps its isolated package namespace.
+- Full image deliveries must be orchestrated by dshanpi-build and automatically published to dshanpi/ArmBianOS Releases under the shared policy. A version-controlled plan must fix the tag, target commit, title, prerelease state, variants and assets. Existing authorization for that pipeline and plan covers uploads within scope; do not require repeated per-asset approval. Obtain authorization for ad hoc publication only when not already covered.
+- Retain `.img`, compress with `--keep`, and verify checksums and image contents. The existing `release` shell mode is the manual CM5 adapter: set `DSHANPI_RELEASE_APPROVED=yes` only for an authorized fixed plan, then run `.agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh release <repo> <image.img.gz>`. Its feature-branch/upstream checks describe manual work; an automated publisher must instead prove the exact pinned remote commit and all shared delivery gates, including post-upload public verification.
+- Never treat the approval flag, a source gate, or a temporary Actions artifact as proof of completed delivery. Report missing automated Release integration explicitly until implemented and tested.
+
+## Hand off
+
+Report the branch, commits, remote ref, build UUID/log, image path and checksum, validation results, untracked files, and hardware tests still outstanding. Stop all mutation when the user says they are taking over.
+
+## Portable maintenance and ownership
+
+This repository copy is the maintained skill; no global ~/.codex skill is required. Use the checkout root, not a previous developer's home path. Read [the historical handoff](references/historical-handoff.md) only for the early CM5 build/release evidence; current state is in [the development handoff](../../../docs/development-handoff.md).
+
+Follow DELIVERY_POLICY.md G13: board/kernel/DT changes stay here, optional DEB recipes and release evidence live in dshanpi-build, and client behavior lives in dspi-config. Stage implementation separately from evidence, then run `python3 tools/check-repository-hygiene.py`. Merge through reviewed PRs into main when authorized; keep historical commits reachable for existing locks.

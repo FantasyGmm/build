@@ -1,3 +1,5 @@
+> DShanPI 开发、构建与发布必须遵守 [三仓统一交付门禁](DELIVERY_POLICY.md)，工作入口见 [AGENTS.md](AGENTS.md)。
+
 <h2 align="center">
   <a href=#><img src="https://raw.githubusercontent.com/armbian/.github/master/profile/logosmall.png" alt="Armbian logo"></a>
   <br><br>
@@ -26,6 +28,11 @@ The entrypoint `compile.sh` dispatches into the framework in `lib/`. Build-time 
 ```bash
 ./compile.sh BOARD=orangepi5 BRANCH=current RELEASE=trixie BUILD_MINIMAL=yes KERNEL_CONFIGURE=no
 ```
+
+### DShanPI A1 CM5
+
+[中文 / English adaptation, device-tree, build, and validation guide](docs/dshanpi-a1-cm5/README.md) • [Repository maintenance skill](.agents/skills/guard-dshanpi-a1-cm5/SKILL.md)
+
 
 ## Build Host Requirements
 

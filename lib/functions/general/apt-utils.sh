@@ -78,6 +78,28 @@ function apt_find_upstream_package_version_and_download_url() {
 		)
 	fi
 
+	# The generated Armbian metadata can temporarily miss an architecture even
+	# though the package is present in the distribution repository.  Fall back
+	# to the repository's Packages index instead of making the whole image build
+	# depend on that secondary metadata being complete.
+	if [[ "${BOARD:-}" == "dshanpi-a1-cm5" && "${found_package_filename}" != "${sought_package_name}_"* ]]; then
+		declare package_index_download_url="http://${mirror_with_slash}dists/${package_download_release}/main/binary-${ARCH}/Packages.xz"
+		declare package_index_download_file
+		package_index_download_file="$(mktemp)"
+		if curl --silent --show-error --fail --max-time 60 "${package_index_download_url}" -o "${package_index_download_file}"; then
+			declare found_package_path
+			found_package_path=$(
+				xz -dc "${package_index_download_file}" | awk -v wanted="${sought_package_name}" '
+					$1 == "Package:" && $2 == wanted { found = 1; next }
+					found && $1 == "Filename:" { print $2; exit }
+					NF == 0 { found = 0 }
+				'
+			)
+			found_package_filename="${found_package_path##*/}"
+		fi
+		rm -f "${package_index_download_file}"
+	fi
+
 	if [[ "${found_package_filename}" == "${sought_package_name}_"* ]]; then
 		display_alert "Found upstream base-files package filename" "${found_package_filename}" "info"
 	else

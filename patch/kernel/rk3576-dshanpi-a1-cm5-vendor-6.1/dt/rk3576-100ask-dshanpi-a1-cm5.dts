@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
+ *
+ */
+
+/dts-v1/;
+
+#include "rk3576.dtsi"
+#include "rk3576-100ask-a1-cm5-common.dtsi"
+
+//#include "rk3576-100ask-480-800-mipi.dtsi"
+//#include "rk3576-100ask-imx415-csi3.dtsi"
+//#include "rk3576-100ask-ov13850-csi3.dtsi"
+#include "rk3576-100ask-a1-cm5-ov13850-3cam.dtsi"
+//#include "rk3576-100ask-rk628d.dtsi"
+//#include "rk3576-100ask-480-360-mipi.dtsi"
+#include "rk3576-100ask-a1-cm5-1024-768-mipi.dtsi"
+#include "rk3576-100ask-a1-cm5-base-v1.dtsi"
+
+/ {
+	model = "Rockchip RK3576 DshanPi A1 CM5 Board";
+	compatible = "dshanpi,dshanpi-a1-cm5", "rockchip,rk3576";
+
+	/* Armbian supplies the root filesystem and console arguments at boot. */
+	chosen {
+		/delete-property/ bootargs;
+	};
+
+	fan: pwm-fan {
+		status = "okay";
+		compatible = "pwm-fan";
+		#cooling-cells = <2>;
+		pwms = <&pwm1_6ch_0 0 50000 1>;
+
+		cooling-levels = <0 100 125 150 200 255>;
+
+		rockchip,temp-trips = <
+			40000    1
+			50000    2
+			60000    3
+			65000    4
+			70000    5
+		>;
+	};
+
+        bt_sco: bt-sco {
+                status = "okay";
+                compatible = "delta,dfbmcs320";
+                #sound-dai-cells = <1>;
+        };
+
+        bt_sound: bt-sound {
+                status = "okay";
+                compatible = "simple-audio-card";
+                simple-audio-card,format = "dsp_a";
+                simple-audio-card,bitclock-inversion;
+                simple-audio-card,mclk-fs = <256>;
+                simple-audio-card,name = "rockchip,bt";
+                simple-audio-card,cpu {
+                        sound-dai = <&sai3>;
+                };
+                simple-audio-card,codec {
+                        sound-dai = <&bt_sco 1>;
+                };
+        };
+};
+
+/******* RTL8852CE *******/
+&pcie0 {
+        reset-gpios = <&gpio1 RK_PB7 GPIO_ACTIVE_HIGH>;
+
+        status = "okay";
+};
+
+/******* pwm-fan *******/
+&pwm1_6ch_0 {
+	status = "okay";
+	pinctrl-0 = <&pwm1m0_ch0>;
+};
+
+/* ws2812  */
+&spi2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi2m1_csn0 &spi2m1_pins>;
+	status = "okay";
+
+	ws2812: ws2812@0 {
+		compatible = "dshanpi-a1,ws2812";
+		spi-max-frequency = <6670000>;
+		leds,number = <15>;
+		reg = <0>;
+		status = "okay";
+	};
+};
+
+&sai3 {
+	pinctrl-0 = <&sai3m2_lrck
+		     &sai3m2_sclk
+		     &sai3m2_sdi
+		     &sai3m2_sdo>;
+	pinctrl-names = "default";
+	status = "okay";
+};

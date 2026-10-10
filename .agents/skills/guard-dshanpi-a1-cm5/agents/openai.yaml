@@ -1,0 +1,4 @@
+interface:
+  display_name: "DShanPI A1 CM5 Maintenance"
+  short_description: "Safely maintain, build, and validate A1 CM5 support"
+  default_prompt: "Use $guard-dshanpi-a1-cm5 to audit or update DShanPI A1 CM5 support without changing the original A1 baseline."

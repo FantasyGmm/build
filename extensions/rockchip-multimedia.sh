@@ -14,7 +14,7 @@ function extension_prepare_config__rockchip_multimedia() {
 	display_alert "Preparing Rockchip multimedia extension" "rockchip-multimedia" "info"
 
 	# Only enable for Rockchip families
-	if [[ "${LINUXFAMILY}" != "rockchip64" && "${LINUXFAMILY}" != "rk322x" && "${LINUXFAMILY}" != "rk3399" && "${LINUXFAMILY}" != "rockchip" && "${LINUXFAMILY}" != "rk35xx" ]]; then
+	if [[ "${BOARDFAMILY}" != "rk35xx" && "${LINUXFAMILY}" != "rockchip64" && "${LINUXFAMILY}" != "rk322x" && "${LINUXFAMILY}" != "rk3399" && "${LINUXFAMILY}" != "rockchip" && "${LINUXFAMILY}" != "rk35xx" ]]; then
 		display_alert "Rockchip multimedia extension" "Not a Rockchip family, skipping" "info"
 		return 0
 	fi
@@ -33,7 +33,7 @@ function post_repo_customize_image__install_rockchip_multimedia() {
 	display_alert "Installing Rockchip multimedia packages" "MPP, RGA, GStreamer" "info"
 
 	# Only proceed for Rockchip families
-	if [[ "${LINUXFAMILY}" != "rockchip64" && "${LINUXFAMILY}" != "rk322x" && "${LINUXFAMILY}" != "rk3399" && "${LINUXFAMILY}" != "rockchip" && "${LINUXFAMILY}" != "rk35xx" ]]; then
+	if [[ "${BOARDFAMILY}" != "rk35xx" && "${LINUXFAMILY}" != "rockchip64" && "${LINUXFAMILY}" != "rk322x" && "${LINUXFAMILY}" != "rk3399" && "${LINUXFAMILY}" != "rockchip" && "${LINUXFAMILY}" != "rk35xx" ]]; then
 		return 0
 	fi
 
