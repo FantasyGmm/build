@@ -7,23 +7,36 @@
 # or downgrade the complete tested DShanPI platform stack.
 
 function install_dshanpi_release_packages() {
-	local attempt
+	local attempt install_result=1 resolver resolver_target
 	local -a apt_network_options=(
 		-o Acquire::Retries=5
 		-o Acquire::http::Timeout=30
 		-o Acquire::https::Timeout=30
 	)
+	resolver="${SDCARD:?}/etc/resolv.conf"
+	resolver_target=$(readlink "$resolver") ||
+		exit_with_error "DShanPI release package installation expected a resolver symlink" "$resolver"
+	# post_debootstrap_tweaks has already prepared the final systemd-resolved
+	# symlink, but systemd-resolved is not running in this final chroot.  Restore
+	# the build-time resolver for this last APT operation, then put the exact
+	# final-image symlink back before the filesystem is packed.
+	rm -f "$resolver"
+	printf 'nameserver %s\n' "${NAMESERVER:?}" > "$resolver"
 	for attempt in 1 2 3; do
 		if use_clean_environment="yes" chroot_sdcard_apt_get \
 			"${apt_network_options[@]}" --no-install-recommends install "$@"; then
-			return 0
+			install_result=0
+			break
 		fi
 		[[ $attempt -lt 3 ]] || break
 		display_alert "Retrying DShanPI release package installation" \
 			"attempt $((attempt + 1)) of 3" "wrn"
 		sleep $((attempt * 10))
 	done
-	exit_with_error "Unable to install DShanPI release package cohort after retries"
+	rm -f "$resolver"
+	ln -s "$resolver_target" "$resolver"
+	[[ $install_result -eq 0 ]] ||
+		exit_with_error "Unable to install DShanPI release package cohort after retries"
 }
 
 function post_post_debootstrap_tweaks__200_install_dshanpi_release_meta() {
