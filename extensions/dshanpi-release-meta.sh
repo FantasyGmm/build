@@ -5,6 +5,27 @@
 # so a not-yet-published release can still be assembled without circular APT
 # access. It marks the initial image cohort so dspi-config can later upgrade
 # or downgrade the complete tested DShanPI platform stack.
+
+function install_dshanpi_release_packages() {
+	local attempt
+	local -a apt_network_options=(
+		-o Acquire::Retries=5
+		-o Acquire::http::Timeout=30
+		-o Acquire::https::Timeout=30
+	)
+	for attempt in 1 2 3; do
+		if use_clean_environment="yes" chroot_sdcard_apt_get \
+			"${apt_network_options[@]}" --no-install-recommends install "$@"; then
+			return 0
+		fi
+		[[ $attempt -lt 3 ]] || break
+		display_alert "Retrying DShanPI release package installation" \
+			"attempt $((attempt + 1)) of 3" "wrn"
+		sleep $((attempt * 10))
+	done
+	exit_with_error "Unable to install DShanPI release package cohort after retries"
+}
+
 function post_post_debootstrap_tweaks__200_install_dshanpi_release_meta() {
 	local package_file package package_name
 	local product="${DSHANPI_PRODUCT:-${BOARD:-}}"
@@ -48,11 +69,11 @@ for item in sys.stdin.read().strip().split(","):
 			install_files+=("/tmp/$(basename "$selected")")
 		done <<< "$dependency_list"
 		cp "$package_file" "$SDCARD/tmp/$package_name"
-		use_clean_environment="yes" chroot_sdcard_apt_get_install "${install_files[@]}"
+		install_dshanpi_release_packages "${install_files[@]}"
 		chroot_sdcard rm "${install_files[@]}"
 		return
 	fi
 	cp "$package_file" "$SDCARD/tmp/$package_name"
-	use_clean_environment="yes" chroot_sdcard_apt_get_install "/tmp/$package_name"
+	install_dshanpi_release_packages "/tmp/$package_name"
 	chroot_sdcard rm "/tmp/$package_name"
 }
