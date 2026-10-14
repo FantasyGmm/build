@@ -1,5 +1,9 @@
 # 仓库强制工作要求
 
+每次产生仓库修改的需求对话必须按 DELIVERY_POLICY.md G14 在 `docs/change-records/`
+提交需求、业务逻辑、Mermaid 流程、失败分支、测试报告与未完成项，并运行
+`python3 tools/check-change-record.py`；PR 描述和聊天记录不能替代该文件。
+
 开始修改、构建、发布或评审前必须读取 [三仓统一交付门禁](DELIVERY_POLICY.md)，并运行
 `python3 tools/check-delivery-policy.py`。
 

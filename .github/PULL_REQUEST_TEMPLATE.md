@@ -54,3 +54,11 @@ _Please delete options that are not relevant._
 
 归属与跨仓依赖：
 新环境复现入口：
+
+## G14 会话变更记录
+
+- [ ] 本 PR 已提交 `docs/change-records/CR-*.md`，关联稳定 REQ 编号。
+- [ ] 记录包含业务逻辑、Mermaid 流程、保持不变的边、失败/超时/重试规则。
+- [ ] 测试表区分静态、模拟、构建、公开端点和实板结果，未测项没有写成通过。
+
+变更记录路径：
