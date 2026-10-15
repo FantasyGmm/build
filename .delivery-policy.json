@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_id": "dshanpi-delivery-v1",
   "role": "armbianos",
-  "sha256": "00d4643efe42847526632406fdc4b54828a4461b95a9531092cff4b7d5537429",
+  "sha256": "f71f425a896ff05afd7674a1224b52ffd2c8088b484fb44c463b6065a3a881be",
   "references": [
     "AGENTS.md",
     "README.md",
@@ -19,6 +19,13 @@
     ".github/workflows/dshanpi-delivery-policy.yml",
     ".agents/skills/guard-dshanpi-a1-cm5/scripts/a1_cm5_gate.sh"
   ],
+  "change_record": {
+    "policy": "docs/change-record-policy.md",
+    "template": ".github/CHANGE_RECORD_TEMPLATE.md",
+    "checker": "tools/check-change-record.py",
+    "test": "tools/test-change-record-policy.py",
+    "directory": "docs/change-records"
+  },
   "hygiene_hooks": [
     ".github/workflows/dshanpi-delivery-policy.yml"
   ]

@@ -33,8 +33,9 @@ def check(root):
     require(hashlib.sha256(policy).hexdigest() == manifest.get("sha256"), "delivery policy SHA-256 mismatch")
     text = policy.decode()
     require(POLICY_ID in text, "policy document lost its identity")
-    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 14)},
-            "delivery policy must retain all thirteen gates, including G12 kernel headers and G13 ownership/handoff")
+    require(set(re.findall(r"^## (G\d+) ", text, re.M)) == {f"G{i:02}" for i in range(1, 15)},
+            "delivery policy must retain all fourteen gates, including G12 kernel headers, "
+            "G13 ownership/handoff, and G14 change records")
     for value in ("https://apt.100ask.net", "dshanpi/ArmBianOS", "dshanpi-a1", "dshanpi-a1-cm5", "dshanpi-r1", "avaota-a1"):
         require(value in text, "delivery policy lost required endpoint/product: " + value)
     references = manifest.get("references", [])
@@ -53,6 +54,25 @@ def check(root):
         require(name.startswith(".github/workflows/"), "hygiene hook must include CI")
         require("check-repository-hygiene.py" in repository_file(root, name).read_text(),
                 "repository hygiene gate not wired in " + name)
+    change_record = manifest.get("change_record", {})
+    require(change_record.get("directory") == "docs/change-records",
+            "wrong change-record directory")
+    for key in ("policy", "template", "checker", "test"):
+        require(key in change_record, "missing change-record entry: " + key)
+        repository_file(root, change_record[key])
+    require("DELIVERY_POLICY.md" in repository_file(root, change_record["policy"]).read_text(),
+            "change-record policy does not link delivery policy")
+    require("DELIVERY_POLICY.md" in repository_file(root, change_record["template"]).read_text(),
+            "change-record template does not link delivery policy")
+    require("docs/change-records" in repository_file(root, change_record["checker"]).read_text(),
+            "change-record checker is not scoped to the record directory")
+    require("check-change-record.py" in repository_file(root, change_record["test"]).read_text(),
+            "change-record tests do not exercise the checker")
+    require(any(
+        name.startswith(".github/workflows/") and
+        "check-change-record.py" in repository_file(root, name).read_text()
+        for name in hooks
+    ), "missing change-record CI gate")
     return manifest, policy
 
 

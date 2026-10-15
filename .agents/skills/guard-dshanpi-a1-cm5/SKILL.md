@@ -17,6 +17,10 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
    - Build, image inspection, package publication, or release work: [references/build-and-validate.md](references/build-and-validate.md)
    - File ownership, rationale, or change history: [references/change-map.md](references/change-map.md)
 4. Inspect schematics, DTS bindings, or hardware evidence before changing electrical routing. Do not "fix" the recorded non-fatal SDIO clock-provider warning without such evidence.
+5. For every implementation conversation, create or update a G14 record under
+   `docs/change-records/` with requirement IDs, business logic, Mermaid flow,
+   failure branches, reproducible tests, evidence references, and explicit untested items.
+   Run `python3 tools/check-change-record.py`; a PR description is not a substitute.
 
 ## Preserve isolation
 
