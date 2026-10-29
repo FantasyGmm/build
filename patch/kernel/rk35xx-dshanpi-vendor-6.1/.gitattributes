@@ -1,0 +1,2 @@
+# Unified-diff context prefixes and mail signatures contain significant spaces.
+*.patch whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab

@@ -40,7 +40,7 @@ SKIP_ARMBIAN_REPO="yes"
 # RK3576 vendor source and common patches.
 function post_family_config_branch_vendor__dshanpi_a1_cm5_kernel_namespace() {
 	declare -g LINUXFAMILY="rk3576-dshanpi-a1-cm5"
-	declare -g LINUXCONFIG="linux-rk35xx-vendor"
+	declare -g LINUXCONFIG="linux-rk35xx-dshanpi-vendor"
 	declare -g KERNELPATCHDIR="${KERNELPATCHDIR} rk3576-dshanpi-a1-cm5-vendor-6.1"
 }
 
