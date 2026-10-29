@@ -451,9 +451,6 @@ case $1 in
 		# hardware preparation
 		prepare_board &
 
-		# configure audio devices
-		/usr/lib/armbian/armbian-audio-config &
-
 		# add usb quirks
 		add_usb_storage_quirks &
 
