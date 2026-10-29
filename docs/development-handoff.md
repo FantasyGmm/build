@@ -9,6 +9,9 @@
 原 A1 基线为 `9a3ce1500ea7d149dabd64247afea21cde920ed9`。CM5 独立 board、DTB、
 内核包命名空间及相机/无线扩展见 [变更地图](../.agents/skills/guard-dshanpi-a1-cm5/references/change-map.md)。
 原 A1 四个受保护路径必须保持一致。共享扩展加载、多媒体识别和 headers 打包修复需独立评估影响。
+2026-10-29 rebase 后的门禁祖先检查点为 `5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7`；
+四文件内容与原基线一致。原提交保留在本地 `backup/pre-rebase-20261029` 分支。
+同步远端或迁移服务器时也须保留该历史引用，保证已有源码锁可回溯。
 历史 CM5 构建与最初 Release 记录已从本机技能归档到
 [historical-handoff](../.agents/skills/guard-dshanpi-a1-cm5/references/historical-handoff.md)，其中版本与路径仅描述当时状态。
 

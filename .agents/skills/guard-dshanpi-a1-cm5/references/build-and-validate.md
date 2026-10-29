@@ -14,7 +14,9 @@ git status --short
 git diff --check
 ```
 
-门禁保护原 A1 基线 `9a3ce1500ea7d149dabd64247afea21cde920ed9`，并检查 CM5 独立命名、关键文件、shell 语法和未误提交的 `__pycache__`。
+门禁保护原 A1 基线 `9a3ce1500ea7d149dabd64247afea21cde920ed9` 的四文件内容。
+上游 rebase 后的祖先检查使用等价源码检查点 `5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7`。
+门禁同时检查 CM5 独立命名、关键文件、shell 语法和未误提交的 `__pycache__`。
 
 ### 2. 普通开发镜像
 

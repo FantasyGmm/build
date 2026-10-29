@@ -15,8 +15,8 @@ Attempting to unload the unbound module then produced a kernel Oops in
 `__arm64_sys_delete_module`. Do not use unloading as a recovery procedure
 for modules built with this mismatch.
 
-The headers packaging callback now conditionally depends on `pahole` for
-BTF-enabled kernels and rejects installation if `olddefconfig` changes the
+The headers packaging callback depends on `pahole | dwarves`, following upstream.
+It rejects installation if `olddefconfig` changes the
 kernel's BTF or BTF_MODULES settings. `tools/test-kernel-headers-btf.py`
 exercises the generated maintainer script with preserved and silently
 removed settings, including kernels built without BTF. CI runs this test.

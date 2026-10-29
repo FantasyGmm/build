@@ -9,7 +9,9 @@ usage() {
 mode=${1:-source}
 repo=${2:-}
 artifact=${3:-}
-baseline=${DSHANPI_A1_BASELINE:-9a3ce1500ea7d149dabd64247afea21cde920ed9}
+# Rebase mapping of original A1 baseline 9a3ce1500ea7d149dabd64247afea21cde920ed9.
+# The four protected files are byte-identical; this is not new hardware evidence.
+baseline=${DSHANPI_A1_BASELINE:-5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7}
 failures=0
 
 pass() { printf '[PASS] %s\n' "$1"; }
@@ -38,7 +40,7 @@ else
 fi
 
 if [[ "$(git merge-base HEAD "$baseline" 2>/dev/null || true)" == "$baseline" ]]; then
-	pass "HEAD descends from the known-good A1 baseline"
+	pass "HEAD descends from the protected A1 source checkpoint"
 else
 	fail "HEAD is not based on $baseline"
 fi

@@ -25,6 +25,7 @@ Maintain the CM5 variant without changing the original A1 implementation. Treat 
 ## Preserve isolation
 
 - Keep baseline `9a3ce1500ea7d149dabd64247afea21cde920ed9` and the four protected original-A1 paths enforced by the gate unchanged unless the user explicitly expands scope after reviewing the proposed diff.
+- The approved 2026-10-29 rebase maps ancestry checks to `5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7`. Its four protected files match the original baseline byte-for-byte. This adds no hardware validation.
 - Put CM5 behavior under `dshanpi-a1-cm5`, DTB `rk3576-100ask-dshanpi-a1-cm5`, kernel namespace `rk3576-dshanpi-a1-cm5`, and its dedicated kernel/U-Boot patch layers.
 - Reuse the shared A1 U-Boot defconfig only through the CM5 board hook that edits the temporary `.config`; never edit the shared defconfig for CM5 selection.
 - Guard shared-framework fallbacks with `BOARD=dshanpi-a1-cm5`. Preserve original A1 behavior.

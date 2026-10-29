@@ -11,6 +11,10 @@
 - `patch/u-boot/legacy/u-boot-radxa-rk35xx/board_dshanpi-a1/u-boot-add-dshanpi-a1-rk3576-dts.patch`
 - `patch/u-boot/legacy/u-boot-radxa-rk35xx/defconfig/dshanpi-a1-rk3576_defconfig`
 
+2026-10-29 上游 rebase 将祖先检查映射到 `5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7`。
+以上四文件与原基线逐字一致；原提交保留在 `backup/pre-rebase-20261029` 历史中。
+映射仅适配 Git 历史，不代表新框架通过构建或实板验收。
+
 已落地的主要提交：`38d6da137`（新增 A1 CM5 板级支持）、`96e43871d` 和 `897e317bb`（早期仓库实验）。APT 构建与发布现已迁往独立的 `dshanpi-build`；本仓库只保留板级源码和镜像构建所需的预制包安装接口。
 
 ### CM5 文件职责
