@@ -1,0 +1,68 @@
+REQ-ARMBIAN-REBASE-001 static evidence; no tests or builds executed.
+Replay HEAD: c822c63bb3530201713effadb7697c4c1d88b1b5
+
+[history]
+0	34
+Replayed non-merge commits: 28
+Replayed merge commits: 6
+PASS: upstream main is an ancestor; original 28 picks and 6 merges preserved.
+
+[protected]
+PASS: original checkpoint, rebased checkpoint and working files match.
+
+[snapshots]
+PASS: all three DShanPI input snapshots are byte-identical; generic config matches upstream.
+
+[policy]
+Delivery policy wiring passed: armbianos (dshanpi-delivery-v1); not a release/hardware verdict
+
+[source]
+Delivery policy wiring passed: armbianos (dshanpi-delivery-v1); not a release/hardware verdict
+[PASS] shared delivery policy is wired
+[PASS] baseline commit exists: 5d7f1a8f1706edde9f2df67e40fff0568bf6bfd7
+[PASS] HEAD descends from the protected A1 source checkpoint
+[PASS] protected A1 file matches baseline: config/boards/dshanpi-a1.csc
+[PASS] protected A1 file matches baseline: extensions/dshanpi-camera.sh
+[PASS] protected A1 file matches baseline: patch/u-boot/legacy/u-boot-radxa-rk35xx/board_dshanpi-a1/u-boot-add-dshanpi-a1-rk3576-dts.patch
+[PASS] protected A1 file matches baseline: patch/u-boot/legacy/u-boot-radxa-rk35xx/defconfig/dshanpi-a1-rk3576_defconfig
+[PASS] config/boards/dshanpi-a1-cm5.csc contains: BOARD_NAME="100ASK DShanPI A1 CM5"
+[PASS] config/boards/dshanpi-a1-cm5.csc contains: BOOT_FDT_FILE="rockchip/rk3576-100ask-dshanpi-a1-cm5.dtb"
+[PASS] config/boards/dshanpi-a1-cm5.csc contains: ENABLE_EXTENSIONS="rockchip-multimedia,dshanpi-cm5-camera,dshanpi-aic8800"
+[PASS] CM5 kernel family and patch layer are isolated
+[PASS] required CM5 path exists: extensions/dshanpi-aic8800.sh
+[PASS] required CM5 path exists: extensions/dshanpi-cm5-camera.sh
+[PASS] required CM5 path exists: patch/kernel/rk3576-dshanpi-a1-cm5-vendor-6.1/dt/rk3576-100ask-dshanpi-a1-cm5.dts
+[PASS] required CM5 path exists: patch/kernel/rk3576-dshanpi-a1-cm5-vendor-6.1/dt/rk3576-100ask-a1-cm5-common.dtsi
+[PASS] required CM5 path exists: patch/kernel/rk3576-dshanpi-a1-cm5-vendor-6.1/dt/rk3576-100ask-a1-cm5-base-v1.dtsi
+[PASS] required CM5 path exists: patch/kernel/rk3576-dshanpi-a1-cm5-vendor-6.1/dt/rk3576-100ask-a1-cm5-ov13850-3cam.dtsi
+[PASS] required CM5 path exists: patch/u-boot/legacy/u-boot-radxa-rk35xx/board_dshanpi-a1-cm5/u-boot-add-dshanpi-a1-rk3576-dts.patch
+[PASS] APT metadata fallback remains CM5-specific
+[PASS] Rockchip multimedia recognizes the shared RK35xx board family
+[PASS] Git whitespace checks passed
+[PASS] shell syntax checks passed
+Gate passed: source
+
+[syntax]
+PASS: changed shell/config entrypoints parse; none executed as builds.
+
+[index]
+Repository hygiene passed: Git index; not a complete credential or ownership audit
+PASS: working/staged diff whitespace and index hygiene.
+
+[record]
+Change-record gate passed: 2 record(s), 71 changed file(s)
+
+PASS: static checks complete. Software, build, public-release and hardware validation NOT-RUN.
+
+[whole-fork-whitespace]
+Supplementary command: git diff --check upstream/main..HEAD
+FAIL: inherited trailing whitespace in extensions/dshanpi-camera.sh:17,21,24,27
+FAIL: inherited trailing whitespace in extensions/rockchip-multimedia.sh:50,54,57,63
+PASS: git diff --exit-code backup/pre-rebase-20261029 HEAD -- extensions/dshanpi-camera.sh extensions/rockchip-multimedia.sh
+Both files are unchanged from the original fork; camera is a protected A1 file.
+No formatting-only edit was made to these legacy files. Integration static gates above passed.
+
+[committed-code]
+18583623c3180bf08077b164bfb3482ac5bf6257 fix(governance): map protected A1 checkpoint after upstream rebase
+adc31de78ab3fae6ea690de5b2475ed65f4be715 fix(audio): retain DShanPI defaults alongside upstream mixer setup
+fd2118a2d67df360dbeddd0c3c9fab1c11851ba1 fix(build): preserve DShanPI vendor inputs after upstream rebase
